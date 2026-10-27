@@ -78,6 +78,11 @@ test('message handler handles /start by greeting user and sending keyboards', as
 
   // Mock sdk api
   const { api } = await import('sdk');
+  let setCommandsPayload = null;
+  api.setMyCommands = async (params) => {
+    setCommandsPayload = params;
+    return { ok: true };
+  };
   api.sendMessage = async (params) => {
     sentMessages.push(params);
     return { ok: true };
@@ -92,6 +97,10 @@ test('message handler handles /start by greeting user and sending keyboards', as
   assert.equal(sentMessages[0].chat_id, 12345);
   assert.ok(sentMessages[0].text.includes('Assalomu alaykum'));
   assert.ok(sentMessages[0].reply_markup.inline_keyboard, 'Should contain inline keyboard');
+
+  assert.ok(setCommandsPayload?.commands, 'Should register bot commands');
+  const commandNames = setCommandsPayload.commands.map((c) => c.command);
+  assert.deepEqual(commandNames, ['start', 'language', 'help']);
 });
 
 test('message handler rejects media if service is not selected first', async () => {

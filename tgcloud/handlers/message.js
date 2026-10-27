@@ -32,8 +32,7 @@ export default async function (message) {
         commands: [
           { command: COMMANDS.START, description: 'Botni ishga tushirish / Start bot' },
           { command: COMMANDS.LANGUAGE, description: 'Tilni tanlash / Select language' },
-          { command: COMMANDS.HELP, description: 'Yordam va ma\'lumot / Help guide' },
-          { command: COMMANDS.CANCEL, description: 'Bekor qilish / Cancel' },
+          { command: COMMANDS.HELP, description: 'Yordam va qo\'llanma / Help guide' },
         ],
       });
     } catch (cmdErr) {
