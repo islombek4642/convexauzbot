@@ -136,21 +136,11 @@ export async function extractAudioWithRendi({
     throw new Error('Rendi processing timed out');
   }
 
-  // 4. Download extracted MP3 bytes
-  const audioRes = await fetchFn(storageUrl);
-  if (!audioRes.ok) {
-    throw new Error(`Failed to download audio from Rendi storage: ${audioRes.status}`);
-  }
-
-  const audioBuffer = await audioRes.arrayBuffer();
-  const audioBytes = new Uint8Array(audioBuffer);
-
   // Generate nice output MP3 filename based on input
   const baseName = fileName.replace(/\.[^/.]+$/, '');
   const outFileName = `${baseName || 'audio'}.mp3`;
 
   return {
-    audioBytes,
     storageUrl,
     duration,
     fileName: outFileName,

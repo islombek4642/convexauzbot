@@ -103,15 +103,6 @@ test('extractAudioWithRendi completes full conversion pipeline', async () => {
       };
     }
 
-    // 4. Download output audio
-    if (url === 'https://storage.rendi.dev/output/audio.mp3') {
-      return {
-        ok: true,
-        status: 200,
-        arrayBuffer: async () => new Uint8Array([10, 20, 30]).buffer,
-      };
-    }
-
     throw new Error('Unexpected URL: ' + url);
   };
 
@@ -127,8 +118,7 @@ test('extractAudioWithRendi completes full conversion pipeline', async () => {
   assert.equal(result.fileName, 'vacation.mp3');
   assert.equal(result.duration, 42.5);
   assert.equal(result.storageUrl, 'https://storage.rendi.dev/output/audio.mp3');
-  assert.deepEqual(result.audioBytes, new Uint8Array([10, 20, 30]));
-  assert.equal(calls.length, 4);
+  assert.equal(calls.length, 3);
 });
 
 test('extractAudioWithRendi throws when Rendi status is FAILED', async () => {

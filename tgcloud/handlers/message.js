@@ -233,13 +233,9 @@ export default async function (message) {
         }
       }
 
-      const audioFile = typeof InputFile !== 'undefined'
-        ? new InputFile(result.audioBytes, result.fileName, { type: 'audio/mpeg' })
-        : new Blob([result.audioBytes], { type: 'audio/mpeg' });
-
       await api.sendAudio({
         chat_id: chatId,
-        audio: audioFile,
+        audio: result.storageUrl,
         caption: t(KEYS.MSG_V2A_COMPLETED, lang),
         duration: result.duration ? Math.round(result.duration) : undefined,
         reply_markup: buildMainReplyKeyboard(lang),
