@@ -139,3 +139,37 @@ test('callback_query handler switches language to ru and sends confirmation', as
   assert.ok(sentMessages[0].text.includes('Русский'));
 });
 
+test('message handler sends general HELP_TEXT for /help and STT_GUIDE_TEXT for guide button', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { t } = await import('../tgcloud/lib/i18n/index.js');
+  const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
+
+  let sentMessages = [];
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+
+  // 1. /help command
+  sentMessages = [];
+  await messageHandler({
+    chat: { id: 12345 },
+    text: '/help',
+  });
+  assert.equal(sentMessages.length, 1);
+  assert.equal(sentMessages[0].text, t(KEYS.HELP_TEXT, 'uz'));
+  assert.equal(sentMessages[0].parse_mode, 'HTML');
+
+  // 2. Guide button click (Uzbek: "🎙 Ovozdan matnga")
+  sentMessages = [];
+  await messageHandler({
+    chat: { id: 12345 },
+    text: '🎙 Ovozdan matnga',
+  });
+  assert.equal(sentMessages.length, 1);
+  assert.equal(sentMessages[0].text, t(KEYS.STT_GUIDE_TEXT, 'uz'));
+  assert.equal(sentMessages[0].parse_mode, 'HTML');
+  assert.notEqual(sentMessages[0].text, t(KEYS.HELP_TEXT, 'uz'));
+});
+

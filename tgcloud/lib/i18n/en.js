@@ -5,7 +5,8 @@ export const en = {
   [KEYS.CHOOSE_LANGUAGE]: 'Please choose your preferred language:',
   [KEYS.LANGUAGE_CHANGED]: 'Language successfully updated: 🇬🇧 English',
   [KEYS.HELP_TITLE]: 'ℹ️ User Guide',
-  [KEYS.HELP_TEXT]: '📌 <b>How to use:</b>\n1. Send me a video (MP4, WEBM), audio (MP3, M4A, WAV, OGG), or a voice message.\n2. I will convert the speech into accurate text using Whisper AI.\n\n⚠️ <b>Limits:</b>\n- Maximum file size: <b>19.5 MB</b>\n- Only <b>1 file</b> can be processed at a time.\n- If the text is very long, it will be delivered in parts and a full timestamped .txt file will be attached.',
+  [KEYS.HELP_TEXT]: 'ℹ️ <b>General Help for ConvexaUzBot:</b>\n\nThis bot is your multi-functional serverless assistant for processing media and various files.\n\n✨ <b>Available Features:</b>\n1. <b>Speech-to-Text:</b> Convert speech from video, audio, and voice messages into accurate text with AI.\n<i>(New exciting features are coming soon!)</i>\n\n📋 <b>Main Commands:</b>\n/start - Restart the bot\n/language - Change language\n/help - General help and information\n\n⚠️ <b>General Rule:</b>\nEach user can only process <b>1 file</b> at a time.',
+  [KEYS.STT_GUIDE_TEXT]: '🎙 <b>Speech-to-Text Guide:</b>\n\n1. Send me a video (MP4, WEBM), audio (MP3, M4A, WAV, OGG, FLAC) or a voice message.\n2. Whisper AI will convert the speech into accurate text in seconds.\n\n⚠️ <b>Technical Limits:</b>\n- Maximum file size: <b>19.5 MB</b>\n- Short texts are delivered directly as messages.\n- Long texts are split into parts and accompanied by a <b>.txt</b> file with all timestamps.',
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Change Language',
   [KEYS.BTN_GUIDE]: '🎙 Speech-to-Text',

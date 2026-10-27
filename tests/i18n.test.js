@@ -41,3 +41,28 @@ test('t() falls back to uz if unknown language requested', () => {
   const uzRes = t(KEYS.HELP_TITLE, 'uz');
   assert.equal(res, uzRes);
 });
+
+test('BTN_GUIDE is distinct and localized across uz, ru, and en', () => {
+  const uzBtn = t(KEYS.BTN_GUIDE, 'uz');
+  const ruBtn = t(KEYS.BTN_GUIDE, 'ru');
+  const enBtn = t(KEYS.BTN_GUIDE, 'en');
+
+  assert.equal(uzBtn, '🎙 Ovozdan matnga');
+  assert.equal(ruBtn, '🎙 Речь в текст');
+  assert.equal(enBtn, '🎙 Speech-to-Text');
+
+  assert.notEqual(uzBtn, ruBtn);
+  assert.notEqual(uzBtn, enBtn);
+  assert.notEqual(ruBtn, enBtn);
+});
+
+test('HELP_TEXT and STT_GUIDE_TEXT are distinct and not identical in any language', () => {
+  for (const lang of ['uz', 'ru', 'en']) {
+    const help = t(KEYS.HELP_TEXT, lang);
+    const sttGuide = t(KEYS.STT_GUIDE_TEXT, lang);
+
+    assert.notEqual(help, sttGuide, `HELP_TEXT and STT_GUIDE_TEXT must be different in ${lang}`);
+    assert.ok(help.includes('ConvexaUzBot'), `General help in ${lang} should introduce ConvexaUzBot`);
+    assert.ok(sttGuide.includes('19.5'), `STT guide in ${lang} should specify 19.5 limit`);
+  }
+});

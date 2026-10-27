@@ -54,13 +54,8 @@ export default async function (message) {
     return;
   }
 
-  // 3. /help command or guide reply button
-  const isGuideBtn =
-    text === t(KEYS.BTN_GUIDE, 'uz') ||
-    text === t(KEYS.BTN_GUIDE, 'ru') ||
-    text === t(KEYS.BTN_GUIDE, 'en');
-
-  if (text === `/${COMMANDS.HELP}` || isGuideBtn) {
+  // 3. /help command
+  if (text === `/${COMMANDS.HELP}`) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.HELP_TEXT, lang),
@@ -70,7 +65,23 @@ export default async function (message) {
     return;
   }
 
-  // 4. Media detection (Video, Audio, Voice, Audio Document)
+  // 4. Speech-to-Text guide button
+  const isGuideBtn =
+    text === t(KEYS.BTN_GUIDE, 'uz') ||
+    text === t(KEYS.BTN_GUIDE, 'ru') ||
+    text === t(KEYS.BTN_GUIDE, 'en');
+
+  if (isGuideBtn) {
+    await api.sendMessage({
+      chat_id: chatId,
+      text: t(KEYS.STT_GUIDE_TEXT, lang),
+      parse_mode: 'HTML',
+      reply_markup: buildReplyKeyboard(lang),
+    });
+    return;
+  }
+
+  // 5. Media detection (Video, Audio, Voice, Audio Document)
   const media = extractMediaInfo(message);
   if (!media) {
     // Plain unhandled text message: remind user how to use bot
@@ -83,7 +94,7 @@ export default async function (message) {
     return;
   }
 
-  // 5. Single-task concurrency check
+  // 6. Single-task concurrency check
   if (user.isProcessing) {
     await api.sendMessage({
       chat_id: chatId,
@@ -93,7 +104,7 @@ export default async function (message) {
     return;
   }
 
-  // 6. File size validation (Strict 19.5 MB ceiling)
+  // 7. File size validation (Strict 19.5 MB ceiling)
   if (media.fileSize > MAX_FILE_SIZE_BYTES) {
     await api.sendMessage({
       chat_id: chatId,
@@ -103,7 +114,7 @@ export default async function (message) {
     return;
   }
 
-  // 7. Acquire processing lock
+  // 8. Acquire processing lock
   await setUserProcessing(chatId, true);
 
   try {

@@ -5,6 +5,7 @@ export const KEYS = {
   LANGUAGE_CHANGED: 'language_changed',
   HELP_TITLE: 'help_title',
   HELP_TEXT: 'help_text',
+  STT_GUIDE_TEXT: 'stt_guide_text',
 
   // Buttons
   BTN_CHANGE_LANGUAGE: 'btn_change_language',
