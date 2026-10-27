@@ -1,0 +1,140 @@
+import assert from 'node:assert/strict';
+import test from 'node:test';
+import { MAX_FILE_SIZE_BYTES } from '../tgcloud/lib/constants/config.js';
+import { getUser, setUserLanguage, setUserProcessing } from '../tgcloud/lib/services/user.js';
+import { extractMediaInfo } from '../tgcloud/lib/services/telegram.js';
+
+test('config defines safe max file size of 19.5 MB', () => {
+  assert.equal(MAX_FILE_SIZE_BYTES, 19.5 * 1024 * 1024);
+  assert.equal(MAX_FILE_SIZE_BYTES, 20447232);
+});
+
+test('extractMediaInfo correctly extracts video, audio, voice and valid documents', () => {
+  const videoMsg = { video: { file_id: 'vid123', file_size: 5000000, file_name: 'clip.mp4' } };
+  const audioMsg = { audio: { file_id: 'aud123', file_size: 2000000, file_name: 'track.mp3' } };
+  const voiceMsg = { voice: { file_id: 'voi123', file_size: 50000 } };
+  const docMsg = { document: { file_id: 'doc123', file_size: 3000000, file_name: 'lecture.m4a', mime_type: 'audio/m4a' } };
+  const textMsg = { text: 'Hello' };
+  const pdfMsg = { document: { file_id: 'pdf123', file_size: 1000, file_name: 'doc.pdf', mime_type: 'application/pdf' } };
+
+  assert.equal(extractMediaInfo(videoMsg)?.fileId, 'vid123');
+  assert.equal(extractMediaInfo(audioMsg)?.fileId, 'aud123');
+  assert.equal(extractMediaInfo(voiceMsg)?.fileId, 'voi123');
+  assert.equal(extractMediaInfo(docMsg)?.fileId, 'doc123');
+  assert.equal(extractMediaInfo(textMsg), null);
+  assert.equal(extractMediaInfo(pdfMsg), null);
+});
+
+test('user service gets or creates user with default language uz and isProcessing false', async () => {
+  let dbRows = {};
+  const mockDb = {
+    select: () => ({
+      from: () => ({
+        where: () => ({
+          get: async () => dbRows[100] || null,
+        }),
+      }),
+    }),
+    insert: () => ({
+      values: (val) => ({
+        onConflictDoUpdate: () => ({
+          returning: () => ({
+            run: async () => {
+              dbRows[val.chatId] = { ...val };
+              return [dbRows[val.chatId]];
+            },
+          }),
+        }),
+      }),
+    }),
+    update: () => ({
+      set: (val) => ({
+        where: () => ({
+          run: async () => {
+            if (dbRows[100]) {
+              Object.assign(dbRows[100], val);
+            }
+          },
+        }),
+      }),
+    }),
+  };
+
+  const user = await getUser(100, mockDb);
+  assert.equal(user.chatId, 100);
+  assert.equal(user.language, 'uz');
+  assert.equal(user.isProcessing, false);
+
+  await setUserLanguage(100, 'ru', mockDb);
+  assert.equal(dbRows[100].language, 'ru');
+
+  await setUserProcessing(100, true, mockDb);
+  assert.equal(Boolean(dbRows[100].isProcessing), true);
+});
+
+test('message handler handles /start by greeting user and sending keyboards', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  let sentMessages = [];
+
+  // Mock sdk api
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+
+  await messageHandler({
+    chat: { id: 12345 },
+    text: '/start',
+  });
+
+  assert.ok(sentMessages.length >= 2, 'Should send welcome and language choice messages');
+  assert.equal(sentMessages[0].chat_id, 12345);
+  assert.ok(sentMessages[0].text.includes('Assalomu alaykum'));
+});
+
+test('message handler rejects file exceeding 19.5 MB limit immediately', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  let sentMessages = [];
+
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+
+  await messageHandler({
+    chat: { id: 12345 },
+    video: {
+      file_id: 'huge_vid',
+      file_size: 21 * 1024 * 1024, // 21 MB
+      file_name: 'huge.mp4',
+    },
+  });
+
+  assert.equal(sentMessages.length, 1);
+  assert.ok(sentMessages[0].text.includes('19.5 MB'), 'Should return file too large message');
+});
+
+test('callback_query handler switches language to ru and sends confirmation', async () => {
+  const callbackHandler = (await import('../tgcloud/handlers/callback_query.js')).default;
+  let sentMessages = [];
+
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+  api.answerCallbackQuery = async () => ({ ok: true });
+
+  await callbackHandler({
+    id: 'query_1',
+    from: { id: 12345 },
+    message: { chat: { id: 12345 } },
+    data: 'set_lang:ru',
+  });
+
+  assert.equal(sentMessages.length, 1);
+  assert.ok(sentMessages[0].text.includes('Русский'));
+});
+
