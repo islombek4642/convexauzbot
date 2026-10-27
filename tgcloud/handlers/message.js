@@ -38,13 +38,7 @@ export default async function (message) {
 
     await api.sendMessage({
       chat_id: chatId,
-      text: t(KEYS.WELCOME, lang),
-      reply_markup: buildReplyKeyboard(lang),
-    });
-
-    await api.sendMessage({
-      chat_id: chatId,
-      text: t(KEYS.CHOOSE_LANGUAGE, lang),
+      text: `${t(KEYS.WELCOME, lang)}\n\n${t(KEYS.CHOOSE_LANGUAGE, lang)}`,
       reply_markup: buildLanguageInlineKeyboard(),
     });
     return;
