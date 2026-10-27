@@ -1,0 +1,14 @@
+{
+  "name": "convexauzbot",
+  "version": "1.0.0",
+  "description": "Telegram Serverless Video/Audio transcription bot",
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "deploy": "tgcloud push",
+    "status": "tgcloud status"
+  },
+  "devDependencies": {
+    "@tgcloud/cli": "^0.2.0"
+  }
+}
