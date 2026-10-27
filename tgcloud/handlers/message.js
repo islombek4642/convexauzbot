@@ -182,63 +182,55 @@ export default async function (message) {
     });
 
     if (!transcription.text) {
+      await setUserState(chatId, STATES.IDLE);
       if (progressMsg && progressMsg.message_id) {
         try {
-          await api.editMessageText({
+          await api.deleteMessage({
             chat_id: chatId,
             message_id: progressMsg.message_id,
-            text: t(KEYS.ERROR_NO_SPEECH_DETECTED, lang),
           });
-          return;
-        } catch (editErr) {
-          console.error('Failed to edit message for no speech:', editErr);
+        } catch (delErr) {
+          console.error('Failed to delete progress message:', delErr);
         }
       }
       await api.sendMessage({
         chat_id: chatId,
         text: t(KEYS.ERROR_NO_SPEECH_DETECTED, lang),
-        reply_markup: buildCancelReplyKeyboard(lang),
+        reply_markup: buildMainReplyKeyboard(lang),
       });
       return;
     }
 
-    // Deliver transcription
+    // Deliver transcription and reset to main menu
+    await setUserState(chatId, STATES.IDLE);
     const chunks = chunkText(transcription.text, 4000);
 
     if (chunks.length === 1) {
-      // Short text: edit the progress indicator directly
-      let edited = false;
       if (progressMsg && progressMsg.message_id) {
         try {
-          await api.editMessageText({
+          await api.deleteMessage({
             chat_id: chatId,
             message_id: progressMsg.message_id,
-            text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
           });
-          edited = true;
-        } catch (editErr) {
-          console.error('Failed to edit progress message:', editErr);
+        } catch (delErr) {
+          console.error('Failed to delete progress message:', delErr);
         }
       }
 
-      if (!edited) {
-        await api.sendMessage({
-          chat_id: chatId,
-          text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
-          reply_markup: buildCancelReplyKeyboard(lang),
-        });
-      }
+      await api.sendMessage({
+        chat_id: chatId,
+        text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
+        reply_markup: buildMainReplyKeyboard(lang),
+      });
     } else {
-      // Long text: edit the progress indicator to completion header
       if (progressMsg && progressMsg.message_id) {
         try {
-          await api.editMessageText({
+          await api.deleteMessage({
             chat_id: chatId,
             message_id: progressMsg.message_id,
-            text: t(KEYS.MSG_COMPLETED, lang),
           });
-        } catch (editErr) {
-          console.error('Failed to edit progress message:', editErr);
+        } catch (delErr) {
+          console.error('Failed to delete progress message:', delErr);
         }
       }
 
@@ -264,7 +256,7 @@ export default async function (message) {
           chat_id: chatId,
           document: docFile,
           caption: t(KEYS.MSG_ATTACHED_TXT, lang),
-          reply_markup: buildCancelReplyKeyboard(lang),
+          reply_markup: buildMainReplyKeyboard(lang),
         });
       } catch (docErr) {
         console.error('Failed to send .txt document:', docErr);
@@ -272,22 +264,21 @@ export default async function (message) {
     }
   } catch (error) {
     console.error('Transcription processing error:', error);
+    await setUserState(chatId, STATES.IDLE);
     if (progressMsg && progressMsg.message_id) {
       try {
-        await api.editMessageText({
+        await api.deleteMessage({
           chat_id: chatId,
           message_id: progressMsg.message_id,
-          text: t(KEYS.ERROR_PROCESSING_FAILED, lang),
         });
-        return;
-      } catch (editErr) {
-        console.error('Failed to edit progress message on error:', editErr);
+      } catch (delErr) {
+        console.error('Failed to delete progress message on error:', delErr);
       }
     }
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.ERROR_PROCESSING_FAILED, lang),
-      reply_markup: buildCancelReplyKeyboard(lang),
+      reply_markup: buildMainReplyKeyboard(lang),
     });
   } finally {
     // Release processing lock

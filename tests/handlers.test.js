@@ -214,9 +214,9 @@ test('message handler sends general HELP_TEXT for /help and STT_GUIDE_TEXT for g
   assert.notEqual(sentMessages[0].text, t(KEYS.HELP_TEXT, 'uz'));
 });
 
-test('message handler edits progress message in-place upon transcription completion', async () => {
+test('message handler deletes progress message and delivers transcription returning to main menu', async () => {
   const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
-  const { setUserState } = await import('../tgcloud/lib/services/user.js');
+  const { setUserState, getUser } = await import('../tgcloud/lib/services/user.js');
   const { t } = await import('../tgcloud/lib/i18n/index.js');
   const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
   const { api } = await import('sdk');
@@ -224,15 +224,15 @@ test('message handler edits progress message in-place upon transcription complet
   await setUserState(12345, 'stt');
 
   let sentMessages = [];
-  let editedMessages = [];
+  let deletedMessages = [];
 
   api.sendMessage = async (params) => {
     sentMessages.push(params);
     return { ok: true, message_id: 888 };
   };
 
-  api.editMessageText = async (params) => {
-    editedMessages.push(params);
+  api.deleteMessage = async (params) => {
+    deletedMessages.push(params);
     return { ok: true };
   };
 
@@ -253,15 +253,21 @@ test('message handler edits progress message in-place upon transcription complet
     });
 
     // 1. Sent progress message
-    assert.equal(sentMessages.length, 1);
     assert.equal(sentMessages[0].text, t(KEYS.MSG_PROCESSING, 'uz'));
 
-    // 2. Edited progress message in-place
-    assert.equal(editedMessages.length, 1);
-    assert.equal(editedMessages[0].chat_id, 12345);
-    assert.equal(editedMessages[0].message_id, 888);
-    assert.ok(editedMessages[0].text.includes('Salom dunyo'));
-    assert.ok(editedMessages[0].text.includes(t(KEYS.MSG_COMPLETED, 'uz')));
+    // 2. Deleted progress message
+    assert.equal(deletedMessages.length, 1);
+    assert.equal(deletedMessages[0].message_id, 888);
+
+    // 3. Sent completed transcription with main reply keyboard
+    assert.equal(sentMessages.length, 2);
+    assert.ok(sentMessages[1].text.includes('Salom dunyo'));
+    assert.ok(sentMessages[1].text.includes(t(KEYS.MSG_COMPLETED, 'uz')));
+    assert.ok(sentMessages[1].reply_markup.keyboard, 'Should restore main reply keyboard');
+
+    // 4. State should automatically reset to idle
+    const user = await getUser(12345);
+    assert.equal(user.state, 'idle');
   } finally {
     globalThis.fetch = originalFetch;
   }
