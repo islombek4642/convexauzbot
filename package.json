@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "deploy": "tgcloud push",
-    "status": "tgcloud status"
+    "deploy": "npx @tgcloud/cli push",
+    "status": "npx @tgcloud/cli status"
   },
   "devDependencies": {
     "@tgcloud/cli": "^0.2.0"
