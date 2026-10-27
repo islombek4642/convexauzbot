@@ -93,10 +93,11 @@ test('message handler handles /start by greeting user and sending keyboards', as
     text: '/start',
   });
 
-  assert.equal(sentMessages.length, 1, 'Should send single combined welcome message with inline buttons');
+  assert.equal(sentMessages.length, 2, 'Should send welcome with reply keyboard and language picker with inline keyboard');
   assert.equal(sentMessages[0].chat_id, 12345);
   assert.ok(sentMessages[0].text.includes('Assalomu alaykum'));
-  assert.ok(sentMessages[0].reply_markup.inline_keyboard, 'Should contain inline keyboard');
+  assert.ok(sentMessages[0].reply_markup.keyboard, 'First message should contain reply keyboard');
+  assert.ok(sentMessages[1].reply_markup.inline_keyboard, 'Second message should contain inline keyboard');
 
   assert.ok(setCommandsPayload?.commands, 'Should register bot commands');
   const commandNames = setCommandsPayload.commands.map((c) => c.command);

@@ -39,9 +39,17 @@ export default async function (message) {
       console.error('setMyCommands error:', cmdErr);
     }
 
+    // 1. Send welcome message with reply keyboard so reply buttons appear immediately
     await api.sendMessage({
       chat_id: chatId,
-      text: `${t(KEYS.WELCOME, lang)}\n\n${t(KEYS.CHOOSE_LANGUAGE, lang)}`,
+      text: t(KEYS.WELCOME, lang),
+      reply_markup: buildMainReplyKeyboard(lang),
+    });
+
+    // 2. Send language selection inline keyboard
+    await api.sendMessage({
+      chat_id: chatId,
+      text: t(KEYS.CHOOSE_LANGUAGE, lang),
       reply_markup: buildLanguageInlineKeyboard(),
     });
     return;
