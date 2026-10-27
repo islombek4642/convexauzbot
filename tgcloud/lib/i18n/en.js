@@ -5,10 +5,10 @@ export const en = {
   [KEYS.CHOOSE_LANGUAGE]: 'Please choose your preferred language:',
   [KEYS.LANGUAGE_CHANGED]: 'Language successfully updated: 🇬🇧 English',
   [KEYS.HELP_TITLE]: 'ℹ️ User Guide',
-  [KEYS.HELP_TEXT]: '📌 **How to use:**\n1. Send me a video (MP4, WEBM), audio (MP3, M4A, WAV, OGG), or a voice message.\n2. I will convert the speech into accurate text using Whisper AI.\n\n⚠️ **Limits:**\n- Maximum file size: **19.5 MB**\n- Only **1 file** can be processed at a time.\n- If the text is very long, it will be delivered in parts and a full timestamped .txt file will be attached.',
+  [KEYS.HELP_TEXT]: '📌 <b>How to use:</b>\n1. Send me a video (MP4, WEBM), audio (MP3, M4A, WAV, OGG), or a voice message.\n2. I will convert the speech into accurate text using Whisper AI.\n\n⚠️ <b>Limits:</b>\n- Maximum file size: <b>19.5 MB</b>\n- Only <b>1 file</b> can be processed at a time.\n- If the text is very long, it will be delivered in parts and a full timestamped .txt file will be attached.',
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Change Language',
-  [KEYS.BTN_GUIDE]: '🎙 Transcription Guide',
+  [KEYS.BTN_GUIDE]: '🎙 Speech-to-Text',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',

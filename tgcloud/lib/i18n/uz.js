@@ -5,10 +5,10 @@ export const uz = {
   [KEYS.CHOOSE_LANGUAGE]: 'Iltimos, o\'zingizga qulay tilni tanlang:',
   [KEYS.LANGUAGE_CHANGED]: 'Til muvaffaqiyatli o\'zgartirildi: 🇺🇿 O\'zbekcha',
   [KEYS.HELP_TITLE]: 'ℹ️ Botdan foydalanish bo\'yicha qo\'llanma',
-  [KEYS.HELP_TEXT]: '📌 **Qanday ishlatiladi:**\n1. Menga video (MP4, WEBM), audio (MP3, M4A, WAV, OGG) yoki ovozli xabar yuboring.\n2. Men undagi nutqni Whisper AI orqali aniq matnga aylantirib beraman.\n\n⚠️ **Cheklovlar:**\n- Maksimal fayl hajmi: **19.5 MB**\n- Bir vaqtda faqat **1 ta fayl** qayta ishlanadi.\n- Agar matn juda uzun bo\'lsa, u qismlarga bo\'linib jo\'natiladi va to\'liq taymkodli .txt fayl taqdim etiladi.',
+  [KEYS.HELP_TEXT]: '📌 <b>Qanday ishlatiladi:</b>\n1. Menga video (MP4, WEBM), audio (MP3, M4A, WAV, OGG) yoki ovozli xabar yuboring.\n2. Men undagi nutqni Whisper AI orqali aniq matnga aylantirib beraman.\n\n⚠️ <b>Cheklovlar:</b>\n- Maksimal fayl hajmi: <b>19.5 MB</b>\n- Bir vaqtda faqat <b>1 ta fayl</b> qayta ishlanadi.\n- Agar matn juda uzun bo\'lsa, u qismlarga bo\'linib jo\'natiladi va to\'liq taymkodli .txt fayl taqdim etiladi.',
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Tilni o\'zgartirish',
-  [KEYS.BTN_GUIDE]: '🎙 Transkripsiya qo\'llanmasi',
+  [KEYS.BTN_GUIDE]: '🎙 Speech-to-Text',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',

@@ -64,6 +64,7 @@ export default async function (message) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.HELP_TEXT, lang),
+      parse_mode: 'HTML',
       reply_markup: buildReplyKeyboard(lang),
     });
     return;
@@ -76,6 +77,7 @@ export default async function (message) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.HELP_TEXT, lang),
+      parse_mode: 'HTML',
       reply_markup: buildReplyKeyboard(lang),
     });
     return;
