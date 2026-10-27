@@ -8,5 +8,6 @@ test('schema exports users table with required columns and types', async () => {
   assert.ok(schema.users.columns.chatId, 'chatId column must exist');
   assert.ok(schema.users.columns.language, 'language column must exist');
   assert.ok(schema.users.columns.isProcessing, 'isProcessing column must exist');
+  assert.ok(schema.users.columns.state, 'state column must exist');
   assert.ok(schema.users.columns.updatedAt, 'updatedAt column must exist');
 });

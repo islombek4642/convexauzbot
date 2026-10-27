@@ -61,7 +61,7 @@ export function extractMediaInfo(message) {
   return null;
 }
 
-export function buildReplyKeyboard(lang) {
+export function buildMainReplyKeyboard(lang) {
   return {
     keyboard: [
       [
@@ -71,6 +71,22 @@ export function buildReplyKeyboard(lang) {
     resize_keyboard: true,
     persistent: true,
   };
+}
+
+export function buildCancelReplyKeyboard(lang) {
+  return {
+    keyboard: [
+      [
+        { text: t(KEYS.BTN_CANCEL, lang) },
+      ],
+    ],
+    resize_keyboard: true,
+    persistent: true,
+  };
+}
+
+export function buildReplyKeyboard(lang) {
+  return buildMainReplyKeyboard(lang);
 }
 
 export function buildLanguageInlineKeyboard() {

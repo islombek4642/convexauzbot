@@ -10,9 +10,14 @@ export const en = {
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Change Language',
   [KEYS.BTN_GUIDE]: '🎙 Speech-to-Text',
+  [KEYS.BTN_CANCEL]: '❌ Cancel',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
+
+  [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Please select a service from the menu below before sending a file:',
+  [KEYS.MSG_ACTION_CANCELLED]: 'Action cancelled. Please choose a service:',
+  [KEYS.MSG_STT_PROMPT]: '🎙 Send a video, audio, or voice message to transcribe:',
 
   [KEYS.MSG_PROCESSING]: '⏳ File received. Transcribing speech to text, please wait...',
   [KEYS.MSG_COMPLETED]: '✅ Transcription completed successfully:',

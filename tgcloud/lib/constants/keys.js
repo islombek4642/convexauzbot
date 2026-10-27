@@ -10,9 +10,15 @@ export const KEYS = {
   // Buttons
   BTN_CHANGE_LANGUAGE: 'btn_change_language',
   BTN_GUIDE: 'btn_guide',
+  BTN_CANCEL: 'btn_cancel',
   BTN_LANG_UZ: 'btn_lang_uz',
   BTN_LANG_RU: 'btn_lang_ru',
   BTN_LANG_EN: 'btn_lang_en',
+
+  // Prompts & Flow
+  MSG_PLEASE_SELECT_SERVICE: 'msg_please_select_service',
+  MSG_ACTION_CANCELLED: 'msg_action_cancelled',
+  MSG_STT_PROMPT: 'msg_stt_prompt',
 
   // Progress & Delivery
   MSG_PROCESSING: 'msg_processing',

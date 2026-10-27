@@ -10,9 +10,14 @@ export const uz = {
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Tilni o\'zgartirish',
   [KEYS.BTN_GUIDE]: '🎙 Ovozdan matnga',
+  [KEYS.BTN_CANCEL]: '❌ Bekor qilish',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
+
+  [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Iltimos, fayl yuborishdan oldin pastdagi menyudan kerakli xizmatni tanlang:',
+  [KEYS.MSG_ACTION_CANCELLED]: 'Amaliyot bekor qilindi. Kerakli xizmatni tanlang:',
+  [KEYS.MSG_STT_PROMPT]: '🎙 Transkripsiya qilish uchun video, audio yoki ovozli xabar yuboring:',
 
   [KEYS.MSG_PROCESSING]: '⏳ Fayl qabul qilindi. Nutq matnga aylantirilmoqda, iltimos kuting...',
   [KEYS.MSG_COMPLETED]: '✅ Transkripsiya muvaffaqiyatli yakunlandi:',

@@ -94,10 +94,42 @@ test('message handler handles /start by greeting user and sending keyboards', as
   assert.ok(sentMessages[0].reply_markup.inline_keyboard, 'Should contain inline keyboard');
 });
 
-test('message handler rejects file exceeding 19.5 MB limit immediately', async () => {
+test('message handler rejects media if service is not selected first', async () => {
   const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
-  let sentMessages = [];
+  const { setUserState } = await import('../tgcloud/lib/services/user.js');
+  const { t } = await import('../tgcloud/lib/i18n/index.js');
+  const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
 
+  await setUserState(12345, 'idle');
+
+  let sentMessages = [];
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+
+  await messageHandler({
+    chat: { id: 12345 },
+    video: {
+      file_id: 'vid_unselected',
+      file_size: 1000000,
+      file_name: 'test.mp4',
+    },
+  });
+
+  assert.equal(sentMessages.length, 1);
+  assert.equal(sentMessages[0].text, t(KEYS.MSG_PLEASE_SELECT_SERVICE, 'uz'));
+  assert.ok(sentMessages[0].reply_markup.keyboard, 'Should show main reply keyboard');
+});
+
+test('message handler rejects file exceeding 19.5 MB limit immediately when in STT state', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { setUserState } = await import('../tgcloud/lib/services/user.js');
+
+  await setUserState(12345, 'stt');
+
+  let sentMessages = [];
   const { api } = await import('sdk');
   api.sendMessage = async (params) => {
     sentMessages.push(params);
@@ -130,8 +162,8 @@ test('callback_query handler switches language to ru and sends confirmation', as
 
   await callbackHandler({
     id: 'query_1',
-    from: { id: 12345 },
-    message: { chat: { id: 12345 } },
+    from: { id: 99999 },
+    message: { chat: { id: 99999 } },
     data: 'set_lang:ru',
   });
 
@@ -175,9 +207,12 @@ test('message handler sends general HELP_TEXT for /help and STT_GUIDE_TEXT for g
 
 test('message handler edits progress message in-place upon transcription completion', async () => {
   const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { setUserState } = await import('../tgcloud/lib/services/user.js');
   const { t } = await import('../tgcloud/lib/i18n/index.js');
   const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
   const { api } = await import('sdk');
+
+  await setUserState(12345, 'stt');
 
   let sentMessages = [];
   let editedMessages = [];
@@ -221,5 +256,33 @@ test('message handler edits progress message in-place upon transcription complet
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+test('cancel button resets user state to idle and sends cancellation confirmation', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { setUserState, getUser } = await import('../tgcloud/lib/services/user.js');
+  const { t } = await import('../tgcloud/lib/i18n/index.js');
+  const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
+
+  await setUserState(12345, 'stt');
+
+  let sentMessages = [];
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+
+  await messageHandler({
+    chat: { id: 12345 },
+    text: '❌ Bekor qilish',
+  });
+
+  assert.equal(sentMessages.length, 1);
+  assert.equal(sentMessages[0].text, t(KEYS.MSG_ACTION_CANCELLED, 'uz'));
+  assert.ok(sentMessages[0].reply_markup.keyboard, 'Should show main reply keyboard');
+
+  const user = await getUser(12345);
+  assert.equal(user.state, 'idle');
 });
 

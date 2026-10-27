@@ -10,9 +10,14 @@ export const ru = {
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Изменить язык',
   [KEYS.BTN_GUIDE]: '🎙 Речь в текст',
+  [KEYS.BTN_CANCEL]: '❌ Отмена',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
+
+  [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Пожалуйста, перед отправкой файла выберите нужную функцию из меню ниже:',
+  [KEYS.MSG_ACTION_CANCELLED]: 'Действие отменено. Выберите нужную функцию:',
+  [KEYS.MSG_STT_PROMPT]: '🎙 Отправьте видео, аудио или голосовое сообщение для транскрибации:',
 
   [KEYS.MSG_PROCESSING]: '⏳ Файл принят. Идет распознавание речи, пожалуйста, подождите...',
   [KEYS.MSG_COMPLETED]: '✅ Транскрибация успешно завершена:',

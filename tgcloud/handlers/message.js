@@ -1,12 +1,14 @@
 import { api, InputFile } from 'sdk';
-import { getUser, setUserProcessing } from '../lib/services/user.js';
+import { getUser, setUserProcessing, setUserState } from '../lib/services/user.js';
 import { t } from '../lib/i18n/index.js';
 import { KEYS } from '../lib/constants/keys.js';
 import { COMMANDS } from '../lib/constants/commands.js';
+import { STATES } from '../lib/constants/states.js';
 import { MAX_FILE_SIZE_BYTES, GROQ_API_KEY } from '../lib/constants/config.js';
 import {
   extractMediaInfo,
-  buildReplyKeyboard,
+  buildMainReplyKeyboard,
+  buildCancelReplyKeyboard,
   buildLanguageInlineKeyboard,
   downloadTelegramFile,
 } from '../lib/services/telegram.js';
@@ -24,12 +26,14 @@ export default async function (message) {
 
   // 1. /start command
   if (text === `/${COMMANDS.START}` || text.startsWith(`/${COMMANDS.START} `)) {
+    await setUserState(chatId, STATES.IDLE);
     try {
       await api.setMyCommands({
         commands: [
           { command: COMMANDS.START, description: 'Botni ishga tushirish / Start bot' },
           { command: COMMANDS.LANGUAGE, description: 'Tilni tanlash / Select language' },
-          { command: COMMANDS.HELP, description: 'Yordam va qo\'llanma / Help guide' },
+          { command: COMMANDS.HELP, description: 'Yordam va ma\'lumot / Help guide' },
+          { command: COMMANDS.CANCEL, description: 'Bekor qilish / Cancel' },
         ],
       });
     } catch (cmdErr) {
@@ -54,67 +58,105 @@ export default async function (message) {
     return;
   }
 
-  // 3. /help command
+  // 3. /cancel command or cancel reply button
+  const isCancelBtn =
+    text === `/${COMMANDS.CANCEL}` ||
+    text === t(KEYS.BTN_CANCEL, 'uz') ||
+    text === t(KEYS.BTN_CANCEL, 'ru') ||
+    text === t(KEYS.BTN_CANCEL, 'en');
+
+  if (isCancelBtn) {
+    await setUserState(chatId, STATES.IDLE);
+    await api.sendMessage({
+      chat_id: chatId,
+      text: t(KEYS.MSG_ACTION_CANCELLED, lang),
+      reply_markup: buildMainReplyKeyboard(lang),
+    });
+    return;
+  }
+
+  // 4. /help command
   if (text === `/${COMMANDS.HELP}`) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.HELP_TEXT, lang),
       parse_mode: 'HTML',
-      reply_markup: buildReplyKeyboard(lang),
+      reply_markup: user.state === STATES.STT ? buildCancelReplyKeyboard(lang) : buildMainReplyKeyboard(lang),
     });
     return;
   }
 
-  // 4. Speech-to-Text guide button
+  // 5. Speech-to-Text service button
   const isGuideBtn =
     text === t(KEYS.BTN_GUIDE, 'uz') ||
     text === t(KEYS.BTN_GUIDE, 'ru') ||
     text === t(KEYS.BTN_GUIDE, 'en');
 
   if (isGuideBtn) {
+    await setUserState(chatId, STATES.STT);
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.STT_GUIDE_TEXT, lang),
       parse_mode: 'HTML',
-      reply_markup: buildReplyKeyboard(lang),
+      reply_markup: buildCancelReplyKeyboard(lang),
     });
     return;
   }
 
-  // 5. Media detection (Video, Audio, Voice, Audio Document)
+  // 6. Media extraction (Video, Audio, Voice, Audio Document)
   const media = extractMediaInfo(message);
   if (!media) {
-    // Plain unhandled text message: remind user how to use bot
+    // If in STT state, guide user to send media or cancel
+    if (user.state === STATES.STT) {
+      await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.MSG_STT_PROMPT, lang),
+        reply_markup: buildCancelReplyKeyboard(lang),
+      });
+      return;
+    }
+
+    // Idle plain text message: remind user to choose a service from the menu
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.HELP_TEXT, lang),
       parse_mode: 'HTML',
-      reply_markup: buildReplyKeyboard(lang),
+      reply_markup: buildMainReplyKeyboard(lang),
     });
     return;
   }
 
-  // 6. Single-task concurrency check
+  // 7. Require user to activate service first
+  if (user.state !== STATES.STT) {
+    await api.sendMessage({
+      chat_id: chatId,
+      text: t(KEYS.MSG_PLEASE_SELECT_SERVICE, lang),
+      reply_markup: buildMainReplyKeyboard(lang),
+    });
+    return;
+  }
+
+  // 8. Single-task concurrency check
   if (user.isProcessing) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.ERROR_ALREADY_PROCESSING, lang),
-      reply_markup: buildReplyKeyboard(lang),
+      reply_markup: buildCancelReplyKeyboard(lang),
     });
     return;
   }
 
-  // 7. File size validation (Strict 19.5 MB ceiling)
+  // 9. File size validation (Strict 19.5 MB ceiling)
   if (media.fileSize > MAX_FILE_SIZE_BYTES) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.ERROR_FILE_TOO_LARGE, lang),
-      reply_markup: buildReplyKeyboard(lang),
+      reply_markup: buildCancelReplyKeyboard(lang),
     });
     return;
   }
 
-  // 8. Acquire processing lock
+  // 10. Acquire processing lock
   await setUserProcessing(chatId, true);
 
   let progressMsg = null;
@@ -155,7 +197,7 @@ export default async function (message) {
       await api.sendMessage({
         chat_id: chatId,
         text: t(KEYS.ERROR_NO_SPEECH_DETECTED, lang),
-        reply_markup: buildReplyKeyboard(lang),
+        reply_markup: buildCancelReplyKeyboard(lang),
       });
       return;
     }
@@ -183,7 +225,7 @@ export default async function (message) {
         await api.sendMessage({
           chat_id: chatId,
           text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
-          reply_markup: buildReplyKeyboard(lang),
+          reply_markup: buildCancelReplyKeyboard(lang),
         });
       }
     } else {
@@ -222,7 +264,7 @@ export default async function (message) {
           chat_id: chatId,
           document: docFile,
           caption: t(KEYS.MSG_ATTACHED_TXT, lang),
-          reply_markup: buildReplyKeyboard(lang),
+          reply_markup: buildCancelReplyKeyboard(lang),
         });
       } catch (docErr) {
         console.error('Failed to send .txt document:', docErr);
@@ -245,10 +287,9 @@ export default async function (message) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.ERROR_PROCESSING_FAILED, lang),
-      reply_markup: buildReplyKeyboard(lang),
+      reply_markup: buildCancelReplyKeyboard(lang),
     });
-  }
- finally {
+  } finally {
     // Release processing lock
     await setUserProcessing(chatId, false);
   }
