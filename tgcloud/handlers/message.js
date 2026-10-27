@@ -117,9 +117,10 @@ export default async function (message) {
   // 8. Acquire processing lock
   await setUserProcessing(chatId, true);
 
+  let progressMsg = null;
   try {
     // Send progress indicator message
-    await api.sendMessage({
+    progressMsg = await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.MSG_PROCESSING, lang),
     });
@@ -139,6 +140,18 @@ export default async function (message) {
     });
 
     if (!transcription.text) {
+      if (progressMsg && progressMsg.message_id) {
+        try {
+          await api.editMessageText({
+            chat_id: chatId,
+            message_id: progressMsg.message_id,
+            text: t(KEYS.ERROR_NO_SPEECH_DETECTED, lang),
+          });
+          return;
+        } catch (editErr) {
+          console.error('Failed to edit message for no speech:', editErr);
+        }
+      }
       await api.sendMessage({
         chat_id: chatId,
         text: t(KEYS.ERROR_NO_SPEECH_DETECTED, lang),
@@ -151,14 +164,43 @@ export default async function (message) {
     const chunks = chunkText(transcription.text, 4000);
 
     if (chunks.length === 1) {
-      // Short text: single message
-      await api.sendMessage({
-        chat_id: chatId,
-        text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
-        reply_markup: buildReplyKeyboard(lang),
-      });
+      // Short text: edit the progress indicator directly
+      let edited = false;
+      if (progressMsg && progressMsg.message_id) {
+        try {
+          await api.editMessageText({
+            chat_id: chatId,
+            message_id: progressMsg.message_id,
+            text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
+          });
+          edited = true;
+        } catch (editErr) {
+          console.error('Failed to edit progress message:', editErr);
+        }
+      }
+
+      if (!edited) {
+        await api.sendMessage({
+          chat_id: chatId,
+          text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
+          reply_markup: buildReplyKeyboard(lang),
+        });
+      }
     } else {
-      // Long text: sequentially numbered chunks [1/N]
+      // Long text: edit the progress indicator to completion header
+      if (progressMsg && progressMsg.message_id) {
+        try {
+          await api.editMessageText({
+            chat_id: chatId,
+            message_id: progressMsg.message_id,
+            text: t(KEYS.MSG_COMPLETED, lang),
+          });
+        } catch (editErr) {
+          console.error('Failed to edit progress message:', editErr);
+        }
+      }
+
+      // Sequentially numbered chunks [1/N]
       for (const chunk of chunks) {
         await api.sendMessage({
           chat_id: chatId,
@@ -188,12 +230,25 @@ export default async function (message) {
     }
   } catch (error) {
     console.error('Transcription processing error:', error);
+    if (progressMsg && progressMsg.message_id) {
+      try {
+        await api.editMessageText({
+          chat_id: chatId,
+          message_id: progressMsg.message_id,
+          text: t(KEYS.ERROR_PROCESSING_FAILED, lang),
+        });
+        return;
+      } catch (editErr) {
+        console.error('Failed to edit progress message on error:', editErr);
+      }
+    }
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.ERROR_PROCESSING_FAILED, lang),
       reply_markup: buildReplyKeyboard(lang),
     });
-  } finally {
+  }
+ finally {
     // Release processing lock
     await setUserProcessing(chatId, false);
   }

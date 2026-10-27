@@ -173,3 +173,53 @@ test('message handler sends general HELP_TEXT for /help and STT_GUIDE_TEXT for g
   assert.notEqual(sentMessages[0].text, t(KEYS.HELP_TEXT, 'uz'));
 });
 
+test('message handler edits progress message in-place upon transcription completion', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { t } = await import('../tgcloud/lib/i18n/index.js');
+  const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
+  const { api } = await import('sdk');
+
+  let sentMessages = [];
+  let editedMessages = [];
+
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true, message_id: 888 };
+  };
+
+  api.editMessageText = async (params) => {
+    editedMessages.push(params);
+    return { ok: true };
+  };
+
+  // Mock globalThis.fetch to simulate Groq API response
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      text: 'Salom dunyo',
+      segments: [{ start: 0, end: 2, text: 'Salom dunyo' }],
+    }),
+  });
+
+  try {
+    await messageHandler({
+      chat: { id: 12345 },
+      voice: { file_id: 'voice_file_1', file_size: 1000 },
+    });
+
+    // 1. Sent progress message
+    assert.equal(sentMessages.length, 1);
+    assert.equal(sentMessages[0].text, t(KEYS.MSG_PROCESSING, 'uz'));
+
+    // 2. Edited progress message in-place
+    assert.equal(editedMessages.length, 1);
+    assert.equal(editedMessages[0].chat_id, 12345);
+    assert.equal(editedMessages[0].message_id, 888);
+    assert.ok(editedMessages[0].text.includes('Salom dunyo'));
+    assert.ok(editedMessages[0].text.includes(t(KEYS.MSG_COMPLETED, 'uz')));
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
