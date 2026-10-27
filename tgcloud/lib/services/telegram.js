@@ -2,7 +2,7 @@ import { api } from 'sdk';
 import { t } from '../i18n/index.js';
 import { KEYS } from '../constants/keys.js';
 
-const SUPPORTED_EXTENSIONS = new Set(['mp4', 'webm', 'mp3', 'm4a', 'wav', 'ogg', 'flac', 'oga']);
+const SUPPORTED_EXTENSIONS = new Set(['mp4', 'webm', 'mov', 'avi', 'mkv', 'mp3', 'm4a', 'wav', 'ogg', 'flac', 'oga']);
 
 export function extractMediaInfo(message) {
   if (!message || typeof message !== 'object') {
@@ -66,6 +66,7 @@ export function buildMainReplyKeyboard(lang) {
     keyboard: [
       [
         { text: t(KEYS.BTN_GUIDE, lang) },
+        { text: t(KEYS.BTN_V2A, lang) },
       ],
     ],
     resize_keyboard: true,

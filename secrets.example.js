@@ -3,3 +3,4 @@
 // `secrets.js` is git-ignored and will NEVER be pushed to GitHub.
 
 export const GROQ_API_KEY = '';
+export const RENDI_API_KEY = '';

@@ -4,7 +4,7 @@ import { t } from '../lib/i18n/index.js';
 import { KEYS } from '../lib/constants/keys.js';
 import { COMMANDS } from '../lib/constants/commands.js';
 import { STATES } from '../lib/constants/states.js';
-import { MAX_FILE_SIZE_BYTES, GROQ_API_KEY } from '../lib/constants/config.js';
+import { MAX_FILE_SIZE_BYTES, GROQ_API_KEY, RENDI_API_KEY } from '../lib/constants/config.js';
 import {
   extractMediaInfo,
   buildMainReplyKeyboard,
@@ -15,6 +15,7 @@ import {
 import { chunkText } from '../lib/utils/chunker.js';
 import { formatSegmentsToTxt } from '../lib/utils/formatter.js';
 import { transcribeMedia } from '../lib/services/groq.js';
+import { extractAudioWithRendi } from '../lib/services/rendi.js';
 
 export default async function (message) {
   if (!message || !message.chat) return;
@@ -81,7 +82,7 @@ export default async function (message) {
       chat_id: chatId,
       text: t(KEYS.HELP_TEXT, lang),
       parse_mode: 'HTML',
-      reply_markup: user.state === STATES.STT ? buildCancelReplyKeyboard(lang) : buildMainReplyKeyboard(lang),
+      reply_markup: user.state !== STATES.IDLE ? buildCancelReplyKeyboard(lang) : buildMainReplyKeyboard(lang),
     });
     return;
   }
@@ -103,7 +104,24 @@ export default async function (message) {
     return;
   }
 
-  // 6. Media extraction (Video, Audio, Voice, Audio Document)
+  // 6. Video-to-Audio (MP3) service button
+  const isV2ABtn =
+    text === t(KEYS.BTN_V2A, 'uz') ||
+    text === t(KEYS.BTN_V2A, 'ru') ||
+    text === t(KEYS.BTN_V2A, 'en');
+
+  if (isV2ABtn) {
+    await setUserState(chatId, STATES.V2A);
+    await api.sendMessage({
+      chat_id: chatId,
+      text: t(KEYS.V2A_GUIDE_TEXT, lang),
+      parse_mode: 'HTML',
+      reply_markup: buildCancelReplyKeyboard(lang),
+    });
+    return;
+  }
+
+  // 7. Media extraction (Video, Audio, Voice, Audio Document)
   const media = extractMediaInfo(message);
   if (!media) {
     // If in STT state, guide user to send media or cancel
@@ -111,6 +129,16 @@ export default async function (message) {
       await api.sendMessage({
         chat_id: chatId,
         text: t(KEYS.MSG_STT_PROMPT, lang),
+        reply_markup: buildCancelReplyKeyboard(lang),
+      });
+      return;
+    }
+
+    // If in V2A state, guide user to send video or cancel
+    if (user.state === STATES.V2A) {
+      await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.MSG_V2A_PROMPT, lang),
         reply_markup: buildCancelReplyKeyboard(lang),
       });
       return;
@@ -126,8 +154,8 @@ export default async function (message) {
     return;
   }
 
-  // 7. Require user to activate service first
-  if (user.state !== STATES.STT) {
+  // 8. Require user to activate service first
+  if (user.state !== STATES.STT && user.state !== STATES.V2A) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.MSG_PLEASE_SELECT_SERVICE, lang),
@@ -136,7 +164,7 @@ export default async function (message) {
     return;
   }
 
-  // 8. Single-task concurrency check
+  // 9. Single-task concurrency check
   if (user.isProcessing) {
     await api.sendMessage({
       chat_id: chatId,
@@ -146,7 +174,7 @@ export default async function (message) {
     return;
   }
 
-  // 9. File size validation (Strict 19.5 MB ceiling)
+  // 10. File size validation (Strict 19.5 MB ceiling)
   if (media.fileSize > MAX_FILE_SIZE_BYTES) {
     await api.sendMessage({
       chat_id: chatId,
@@ -156,7 +184,91 @@ export default async function (message) {
     return;
   }
 
-  // 10. Acquire processing lock
+  // 11. Handle Video-to-Audio (MP3) extraction
+  if (user.state === STATES.V2A) {
+    const isVideo =
+      media.mimeType.startsWith('video/') ||
+      ['mp4', 'webm', 'mov', 'avi', 'mkv'].some((ext) =>
+        media.fileName.toLowerCase().endsWith('.' + ext)
+      );
+
+    if (!isVideo) {
+      await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.ERROR_NOT_A_VIDEO, lang),
+        reply_markup: buildCancelReplyKeyboard(lang),
+      });
+      return;
+    }
+
+    await setUserProcessing(chatId, true);
+    let v2aProgressMsg = null;
+    try {
+      v2aProgressMsg = await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.MSG_V2A_PROCESSING, lang),
+      });
+
+      const fileBytes = await downloadTelegramFile(media.fileId);
+      if (!fileBytes) {
+        throw new Error('Failed to retrieve file bytes from Telegram');
+      }
+
+      const result = await extractAudioWithRendi({
+        fileBytes,
+        fileName: media.fileName,
+        mimeType: media.mimeType,
+        apiKey: RENDI_API_KEY,
+      });
+
+      await setUserState(chatId, STATES.IDLE);
+      if (v2aProgressMsg && v2aProgressMsg.message_id) {
+        try {
+          await api.deleteMessage({
+            chat_id: chatId,
+            message_id: v2aProgressMsg.message_id,
+          });
+        } catch (delErr) {
+          console.error('Failed to delete progress message:', delErr);
+        }
+      }
+
+      const audioFile = typeof InputFile !== 'undefined'
+        ? new InputFile(result.audioBytes, result.fileName, { type: 'audio/mpeg' })
+        : new Blob([result.audioBytes], { type: 'audio/mpeg' });
+
+      await api.sendAudio({
+        chat_id: chatId,
+        audio: audioFile,
+        caption: t(KEYS.MSG_V2A_COMPLETED, lang),
+        duration: result.duration ? Math.round(result.duration) : undefined,
+        reply_markup: buildMainReplyKeyboard(lang),
+      });
+    } catch (v2aErr) {
+      console.error('V2A processing error:', v2aErr);
+      await setUserState(chatId, STATES.IDLE);
+      if (v2aProgressMsg && v2aProgressMsg.message_id) {
+        try {
+          await api.deleteMessage({
+            chat_id: chatId,
+            message_id: v2aProgressMsg.message_id,
+          });
+        } catch (delErr) {
+          console.error('Failed to delete progress message on error:', delErr);
+        }
+      }
+      await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.ERROR_V2A_FAILED, lang),
+        reply_markup: buildMainReplyKeyboard(lang),
+      });
+    } finally {
+      await setUserProcessing(chatId, false);
+    }
+    return;
+  }
+
+  // 12. Handle Speech-to-Text (STT)
   await setUserProcessing(chatId, true);
 
   let progressMsg = null;

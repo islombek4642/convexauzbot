@@ -301,3 +301,150 @@ test('cancel button resets user state to idle and sends cancellation confirmatio
   assert.equal(user.state, 'idle');
 });
 
+test('V2A button sets user state to v2a and sends V2A guide text with cancel keyboard', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { getUser } = await import('../tgcloud/lib/services/user.js');
+  const { t } = await import('../tgcloud/lib/i18n/index.js');
+  const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
+
+  let sentMessages = [];
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+
+  await messageHandler({
+    chat: { id: 12345 },
+    text: t(KEYS.BTN_V2A, 'uz'),
+  });
+
+  assert.equal(sentMessages.length, 1);
+  assert.equal(sentMessages[0].text, t(KEYS.V2A_GUIDE_TEXT, 'uz'));
+  assert.ok(sentMessages[0].reply_markup.keyboard, 'Should show cancel keyboard');
+
+  const user = await getUser(12345);
+  assert.equal(user.state, 'v2a');
+});
+
+test('V2A state rejects non-video media with ERROR_NOT_A_VIDEO', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { setUserState } = await import('../tgcloud/lib/services/user.js');
+  const { t } = await import('../tgcloud/lib/i18n/index.js');
+  const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
+
+  await setUserState(12345, 'v2a');
+
+  let sentMessages = [];
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true };
+  };
+
+  // Send audio file while in V2A state
+  await messageHandler({
+    chat: { id: 12345 },
+    audio: { file_id: 'aud_999', file_size: 1000, file_name: 'song.mp3' },
+  });
+
+  assert.equal(sentMessages.length, 1);
+  assert.equal(sentMessages[0].text, t(KEYS.ERROR_NOT_A_VIDEO, 'uz'));
+  assert.ok(sentMessages[0].reply_markup.keyboard, 'Should keep cancel keyboard');
+});
+
+test('V2A state extracts audio from video and returns audio file with main keyboard', async () => {
+  const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
+  const { setUserState, getUser } = await import('../tgcloud/lib/services/user.js');
+  const { t } = await import('../tgcloud/lib/i18n/index.js');
+  const { KEYS } = await import('../tgcloud/lib/constants/keys.js');
+
+  await setUserState(12345, 'v2a');
+
+  let sentMessages = [];
+  let sentAudios = [];
+  let deletedMessages = [];
+  const { api } = await import('sdk');
+  api.sendMessage = async (params) => {
+    sentMessages.push(params);
+    return { ok: true, message_id: 777 };
+  };
+  api.sendAudio = async (params) => {
+    sentAudios.push(params);
+    return { ok: true };
+  };
+  api.deleteMessage = async (params) => {
+    deletedMessages.push(params);
+    return { ok: true };
+  };
+  api.getFileContent = async () => new Uint8Array([1, 2, 3, 4]);
+
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (url) => {
+    if (url === 'https://uguu.se/upload') {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ files: [{ url: 'https://n.uguu.se/mock_video.mp4' }] }),
+      };
+    }
+    if (url === 'https://api.rendi.dev/v1/run-ffmpeg-command') {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({ command_id: 'cmd-v2a' }),
+      };
+    }
+    if (url === 'https://api.rendi.dev/v1/commands/cmd-v2a') {
+      return {
+        ok: true,
+        status: 200,
+        json: async () => ({
+          status: 'SUCCESS',
+          output_files: {
+            out_1: {
+              storage_url: 'https://storage.rendi.dev/output/extracted.mp3',
+              duration: 15.2,
+            },
+          },
+        }),
+      };
+    }
+    if (url === 'https://storage.rendi.dev/output/extracted.mp3') {
+      return {
+        ok: true,
+        status: 200,
+        arrayBuffer: async () => new Uint8Array([55, 66, 77]).buffer,
+      };
+    }
+    return originalFetch(url);
+  };
+
+  try {
+    await messageHandler({
+      chat: { id: 12345 },
+      video: { file_id: 'vid_123', file_size: 500000, file_name: 'clip.mp4' },
+    });
+
+    // 1. Progress message sent
+    assert.equal(sentMessages.length, 1);
+    assert.equal(sentMessages[0].text, t(KEYS.MSG_V2A_PROCESSING, 'uz'));
+
+    // 2. Progress message deleted
+    assert.equal(deletedMessages.length, 1);
+    assert.equal(deletedMessages[0].message_id, 777);
+
+    // 3. Audio delivered with main reply keyboard
+    assert.equal(sentAudios.length, 1);
+    assert.equal(sentAudios[0].caption, t(KEYS.MSG_V2A_COMPLETED, 'uz'));
+    assert.ok(sentAudios[0].reply_markup.keyboard, 'Should show main reply keyboard');
+
+    // 4. State reset to idle
+    const user = await getUser(12345);
+    assert.equal(user.state, 'idle');
+    assert.equal(user.isProcessing, false);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+

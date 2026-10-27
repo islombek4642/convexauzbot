@@ -5,11 +5,13 @@ export const en = {
   [KEYS.CHOOSE_LANGUAGE]: 'Please choose your preferred language:',
   [KEYS.LANGUAGE_CHANGED]: 'Language successfully updated: 🇬🇧 English',
   [KEYS.HELP_TITLE]: 'ℹ️ User Guide',
-  [KEYS.HELP_TEXT]: 'ℹ️ <b>General Help for ConvexaUzBot:</b>\n\nThis bot is your multi-functional assistant for processing media and various files.\n\n✨ <b>Available Features:</b>\n1. <b>Speech-to-Text:</b> Convert speech from video, audio, and voice messages into accurate text.\n<i>(New exciting features are coming soon!)</i>\n\n📋 <b>Main Commands:</b>\n/start - Restart the bot\n/language - Change language\n/help - General help and information\n\n⚠️ <b>General Rule:</b>\nEach user can only process <b>1 file</b> at a time.',
+  [KEYS.HELP_TEXT]: 'ℹ️ <b>General Help for ConvexaUzBot:</b>\n\nThis bot is your multi-functional assistant for processing media and various files.\n\n✨ <b>Available Features:</b>\n1. <b>Speech-to-Text:</b> Convert speech from video, audio, and voice messages into accurate text.\n2. <b>Video to Audio (Video to MP3):</b> Extract audio tracks from videos into clean MP3 format.\n\n📋 <b>Main Commands:</b>\n/start - Restart the bot\n/language - Change language\n/help - General help and information\n\n⚠️ <b>General Rule:</b>\nEach user can only process <b>1 file</b> at a time.',
   [KEYS.STT_GUIDE_TEXT]: '🎙 <b>Speech-to-Text Guide:</b>\n\n1. Send me a video (MP4, WEBM), audio (MP3, M4A, WAV, OGG, FLAC) or a voice message.\n2. Speech will quickly be converted into accurate text.\n\n⚠️ <b>Technical Limits:</b>\n- Maximum file size: <b>19.5 MB</b>\n- Short texts are delivered directly as messages.\n- Long texts are split into parts and the full text is attached as a <b>.txt</b> file.',
+  [KEYS.V2A_GUIDE_TEXT]: '🎬 <b>Video to Audio (Video to MP3) Guide:</b>\n\n1. Send me a video file (MP4, WEBM, MOV, AVI).\n2. The audio track will quickly be extracted in high-quality MP3 format.\n\n⚠️ <b>Technical Limits:</b>\n- Maximum file size: <b>19.5 MB</b>\n- Only video files are accepted.',
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Change Language',
   [KEYS.BTN_GUIDE]: '🎙 Speech-to-Text',
+  [KEYS.BTN_V2A]: '🎬 Video to Audio (MP3)',
   [KEYS.BTN_CANCEL]: '❌ Cancel',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
@@ -18,9 +20,12 @@ export const en = {
   [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Please select a service from the menu below before sending a file:',
   [KEYS.MSG_ACTION_CANCELLED]: 'Action cancelled. Please choose a service:',
   [KEYS.MSG_STT_PROMPT]: '🎙 Send a video, audio, or voice message to transcribe:',
+  [KEYS.MSG_V2A_PROMPT]: '🎬 Send a video to extract its audio track:',
 
   [KEYS.MSG_PROCESSING]: '⏳ File received. Transcribing speech to text, please wait...',
   [KEYS.MSG_COMPLETED]: '✅ Transcription completed successfully:',
+  [KEYS.MSG_V2A_PROCESSING]: '⏳ Video received. Extracting audio (MP3), please wait...',
+  [KEYS.MSG_V2A_COMPLETED]: '✅ Audio extracted successfully:',
   [KEYS.MSG_ATTACHED_TXT]: '📄 Attached below is the full transcription file.',
   [KEYS.CHUNK_HEADER]: '[{current}/{total}]',
 
@@ -30,4 +35,6 @@ export const en = {
   [KEYS.ERROR_UNSUPPORTED_FORMAT]: '❌ Unsupported format. Please send a supported video or audio file.',
   [KEYS.ERROR_PROCESSING_FAILED]: '❌ An unexpected error occurred while processing. Please try again in a few moments.',
   [KEYS.ERROR_FETCH_FILE_FAILED]: '❌ Failed to download the file from Telegram servers.',
+  [KEYS.ERROR_NOT_A_VIDEO]: '❌ Please send a video file only (MP4, WEBM, MOV, AVI).',
+  [KEYS.ERROR_V2A_FAILED]: '❌ An error occurred while extracting audio from video. Please try again later.',
 };
