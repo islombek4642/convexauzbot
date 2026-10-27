@@ -3,3 +3,5 @@ node_modules/
 .superpowers/
 .env
 .env.*
+tgcloud/lib/constants/secrets.js
+
