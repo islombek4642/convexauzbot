@@ -1,3 +1,4 @@
+import { api } from 'sdk';
 import { t } from '../i18n/index.js';
 import { KEYS } from '../constants/keys.js';
 
@@ -85,15 +86,6 @@ export function buildLanguageInlineKeyboard() {
   };
 }
 
-export async function downloadTelegramFile(filePath, botToken, customFetch) {
-  const fetchFn = customFetch || globalThis.fetch;
-  const token = botToken || process.env.BOT_TOKEN;
-  const url = `https://api.telegram.org/file/bot${token}/${filePath}`;
-
-  const response = await fetchFn(url);
-  if (!response.ok) {
-    throw new Error(`Failed to download file from Telegram: ${response.status}`);
-  }
-
-  return await response.blob();
+export async function downloadTelegramFile(fileId) {
+  return await api.getFileContent(fileId);
 }

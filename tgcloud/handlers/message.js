@@ -1,9 +1,9 @@
-import { api } from 'sdk';
+import { api, InputFile } from 'sdk';
 import { getUser, setUserProcessing } from '../lib/services/user.js';
 import { t } from '../lib/i18n/index.js';
 import { KEYS } from '../lib/constants/keys.js';
 import { COMMANDS } from '../lib/constants/commands.js';
-import { MAX_FILE_SIZE_BYTES, GROQ_API_KEY, BOT_TOKEN } from '../lib/constants/config.js';
+import { MAX_FILE_SIZE_BYTES, GROQ_API_KEY } from '../lib/constants/config.js';
 import {
   extractMediaInfo,
   buildReplyKeyboard,
@@ -122,18 +122,17 @@ export default async function (message) {
       text: t(KEYS.MSG_PROCESSING, lang),
     });
 
-    // Get file info and download link
-    const fileInfo = await api.getFile({ file_id: media.fileId });
-    if (!fileInfo || !fileInfo.result || !fileInfo.result.file_path) {
-      throw new Error('Telegram getFile returned invalid file path');
+    // Download file bytes directly via SDK
+    const fileBytes = await downloadTelegramFile(media.fileId);
+    if (!fileBytes) {
+      throw new Error('Failed to retrieve file bytes from Telegram');
     }
-
-    const fileBlob = await downloadTelegramFile(fileInfo.result.file_path, BOT_TOKEN);
 
     // Call Groq Whisper service
     const transcription = await transcribeMedia({
-      fileBlob,
+      fileBytes,
       fileName: media.fileName,
+      mimeType: media.mimeType,
       apiKey: GROQ_API_KEY,
     });
 
@@ -167,12 +166,17 @@ export default async function (message) {
 
       // Format original segments with timestamps into .txt document
       const txtContent = formatSegmentsToTxt(transcription.segments) || transcription.text;
-      const txtBlob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+      const encoder = new TextEncoder();
+      const txtBytes = encoder.encode(txtContent);
 
       try {
+        const docFile = typeof InputFile !== 'undefined'
+          ? new InputFile(txtBytes, 'transcription.txt', { type: 'text/plain' })
+          : new Blob([txtBytes], { type: 'text/plain' });
+
         await api.sendDocument({
           chat_id: chatId,
-          document: txtBlob,
+          document: docFile,
           caption: t(KEYS.MSG_ATTACHED_TXT, lang),
           reply_markup: buildReplyKeyboard(lang),
         });

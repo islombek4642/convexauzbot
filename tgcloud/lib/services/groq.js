@@ -1,9 +1,13 @@
+import { fetch, FormData, InputFile } from 'sdk';
+
 export const GROQ_WHISPER_URL = 'https://api.groq.com/openai/v1/audio/transcriptions';
 export const GROQ_WHISPER_MODEL = 'whisper-large-v3-turbo';
 
 export async function transcribeMedia({
+  fileBytes,
   fileBlob,
   fileName = 'audio.mp3',
+  mimeType = 'audio/mp3',
   apiKey,
   customFetch,
 }) {
@@ -11,17 +15,22 @@ export async function transcribeMedia({
     throw new Error('GROQ_API_KEY is required for transcription');
   }
 
-  if (!fileBlob) {
-    throw new Error('fileBlob is required for transcription');
+  const payload = fileBytes || fileBlob;
+  if (!payload) {
+    throw new Error('File data is required for transcription');
   }
 
-  const fetchFn = customFetch || globalThis.fetch;
-  if (typeof fetchFn !== 'function') {
-    throw new Error('Fetch API is not available');
-  }
-
+  const fetchFn = customFetch || fetch || globalThis.fetch;
   const formData = new FormData();
-  formData.append('file', fileBlob, fileName);
+
+  if (typeof InputFile !== 'undefined' && payload instanceof Uint8Array) {
+    formData.append('file', new InputFile(payload, fileName, { type: mimeType }));
+  } else if (typeof Blob !== 'undefined' && payload instanceof Blob) {
+    formData.append('file', payload, fileName);
+  } else {
+    formData.append('file', new Blob([payload], { type: mimeType }), fileName);
+  }
+
   formData.append('model', GROQ_WHISPER_MODEL);
   formData.append('response_format', 'verbose_json');
   formData.append('temperature', '0');
