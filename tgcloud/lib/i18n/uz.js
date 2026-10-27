@@ -1,12 +1,12 @@
 import { KEYS } from '../constants/keys.js';
 
 export const uz = {
-  [KEYS.WELCOME]: 'Assalomu alaykum! Xush kelibsiz.\n\nMen video, audio va ovozli xabarlarni matnga (Speech-to-Text) aylantirib beruvchi botman. Menga fayl yuboring!',
+  [KEYS.WELCOME]: 'Assalomu alaykum! Xush kelibsiz.\n\nConvexaUzBot — media va turli fayllar bilan ishlash uchun qulay yordamchingiz. Kerakli xizmatdan foydalanish uchun quyidagi menyudan foydalaning yoki fayl yuboring!',
   [KEYS.CHOOSE_LANGUAGE]: 'Iltimos, o\'zingizga qulay tilni tanlang:',
   [KEYS.LANGUAGE_CHANGED]: 'Til muvaffaqiyatli o\'zgartirildi: 🇺🇿 O\'zbekcha',
   [KEYS.HELP_TITLE]: 'ℹ️ Botdan foydalanish bo\'yicha qo\'llanma',
-  [KEYS.HELP_TEXT]: 'ℹ️ <b>ConvexaUzBot bo\'yicha umumiy yordam:</b>\n\nBu bot media va turli xil fayllarni qayta ishlovchi ko\'p funksiyali serverless yordamchingizdir.\n\n✨ <b>Mavjud xizmatlar:</b>\n1. <b>Ovozdan matnga (Speech-to-Text):</b> Video, audio va ovozli xabarlardagi nutqni AI orqali aniq matnga aylantirish.\n<i>(Yangi qulay funksiyalar tez orada qo\'shiladi!)</i>\n\n📋 <b>Asosiy buyruqlar:</b>\n/start - Botni qayta ishga tushirish\n/language - Tilni o\'zgartirish\n/help - Umumiy yordam va ma\'lumot\n\n⚠️ <b>Umumiy qoida:</b>\nHar bir foydalanuvchi bir vaqtning o\'zida faqat <b>1 ta faylni</b> qayta ishlashi mumkin.',
-  [KEYS.STT_GUIDE_TEXT]: '🎙 <b>Ovozdan matnga (Speech-to-Text) yo\'riqnomasi:</b>\n\n1. Menga video (MP4, WEBM), audio (MP3, M4A, WAV, OGG, FLAC) yoki ovozli xabar yuboring.\n2. Whisper AI yordamida nutq soniyalar ichida matnga aylantiriladi.\n\n⚠️ <b>Texnik cheklovlar:</b>\n- Maksimal fayl hajmi: <b>19.5 MB</b>\n- Qisqa matnlar to\'g\'ridan-to\'g\'ri xabarda yuboriladi.\n- Uzun matnlar qismlarga bo\'linadi va barcha taymkodlar aks etgan <b>.txt</b> fayl ilova qilinadi.',
+  [KEYS.HELP_TEXT]: 'ℹ️ <b>ConvexaUzBot bo\'yicha umumiy yordam:</b>\n\nBu bot media va turli xil fayllarni qayta ishlovchi ko\'p funksiyali yordamchingizdir.\n\n✨ <b>Mavjud xizmatlar:</b>\n1. <b>Ovozdan matnga (Speech-to-Text):</b> Video, audio va ovozli xabarlardagi nutqni aniq matnga aylantirish.\n<i>(Yangi qulay funksiyalar tez orada qo\'shiladi!)</i>\n\n📋 <b>Asosiy buyruqlar:</b>\n/start - Botni qayta ishga tushirish\n/language - Tilni o\'zgartirish\n/help - Umumiy yordam va ma\'lumot\n\n⚠️ <b>Umumiy qoida:</b>\nHar bir foydalanuvchi bir vaqtning o\'zida faqat <b>1 ta faylni</b> qayta ishlashi mumkin.',
+  [KEYS.STT_GUIDE_TEXT]: '🎙 <b>Ovozdan matnga (Speech-to-Text) yo\'riqnomasi:</b>\n\n1. Menga video (MP4, WEBM), audio (MP3, M4A, WAV, OGG, FLAC) yoki ovozli xabar yuboring.\n2. Nutq tezkorlik bilan aniq matnga aylantiriladi.\n\n⚠️ <b>Texnik cheklovlar:</b>\n- Maksimal fayl hajmi: <b>19.5 MB</b>\n- Qisqa matnlar to\'g\'ridan-to\'g\'ri xabarda yuboriladi.\n- Uzun matnlar qismlarga bo\'linadi va to\'liq matn <b>.txt</b> fayl shaklida ilova qilinadi.',
 
   [KEYS.BTN_CHANGE_LANGUAGE]: '🌐 Tilni o\'zgartirish',
   [KEYS.BTN_GUIDE]: '🎙 Ovozdan matnga',
@@ -16,7 +16,7 @@ export const uz = {
 
   [KEYS.MSG_PROCESSING]: '⏳ Fayl qabul qilindi. Nutq matnga aylantirilmoqda, iltimos kuting...',
   [KEYS.MSG_COMPLETED]: '✅ Transkripsiya muvaffaqiyatli yakunlandi:',
-  [KEYS.MSG_ATTACHED_TXT]: '📄 Quyida barcha taymkodlar aks etgan to\'liq transkripsiya fayli ilova qilindi.',
+  [KEYS.MSG_ATTACHED_TXT]: '📄 Quyida to\'liq transkripsiya fayli ilova qilindi.',
   [KEYS.CHUNK_HEADER]: '[{current}/{total}]',
 
   [KEYS.ERROR_ALREADY_PROCESSING]: '⚠️ Oldingi faylingiz hali qayta ishlanmoqda. Yangi fayl yuborishdan avval iltimos uning yakunlanishini kuting.',
