@@ -1,4 +1,4 @@
-import { fetch as sdkFetch, FormData as SdkFormData } from 'sdk';
+import { fetch as sdkFetch, FormData as SdkFormData, InputFile } from 'sdk';
 
 /**
  * Uploads media file to a fast temporary host so Rendi cloud can access it via direct URL.
@@ -9,8 +9,11 @@ export async function uploadTempFile(fileBytes, fileName = 'video.mp4', mimeType
   const FormDataClass = typeof FormData !== 'undefined' ? FormData : SdkFormData;
 
   const form = new FormDataClass();
-  const blob = new Blob([fileBytes], { type: mimeType });
-  form.append('files[]', blob, fileName);
+  const filePayload = typeof Blob !== 'undefined'
+    ? new Blob([fileBytes], { type: mimeType })
+    : (typeof InputFile !== 'undefined' ? new InputFile(fileBytes, fileName, { type: mimeType }) : fileBytes);
+
+  form.append('files[]', filePayload, fileName);
 
   const res = await fetchFn('https://uguu.se/upload', {
     method: 'POST',
@@ -28,6 +31,23 @@ export async function uploadTempFile(fileBytes, fileName = 'video.mp4', mimeType
   }
 
   return data.files[0].url;
+}
+
+function sleep(ms) {
+  if (typeof setTimeout !== 'undefined') {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  try {
+    const sab = new SharedArrayBuffer(4);
+    const int32 = new Int32Array(sab);
+    Atomics.wait(int32, 0, 0, ms);
+  } catch (e) {
+    const start = Date.now();
+    while (Date.now() - start < ms) {
+      // Busy wait fallback if Atomics is not allowed
+    }
+  }
+  return Promise.resolve();
 }
 
 /**
@@ -85,7 +105,7 @@ export async function extractAudioWithRendi({
 
   for (let attempt = 0; attempt < maxPollAttempts; attempt++) {
     if (attempt > 0) {
-      await new Promise((resolve) => setTimeout(resolve, pollIntervalMs));
+      await sleep(pollIntervalMs);
     }
 
     const pollRes = await fetchFn(`https://api.rendi.dev/v1/commands/${command_id}`, {
