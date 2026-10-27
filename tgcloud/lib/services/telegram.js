@@ -65,7 +65,6 @@ export function buildReplyKeyboard(lang) {
   return {
     keyboard: [
       [
-        { text: t(KEYS.BTN_CHANGE_LANGUAGE, lang) },
         { text: t(KEYS.BTN_GUIDE, lang) },
       ],
     ],

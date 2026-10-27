@@ -50,13 +50,8 @@ export default async function (message) {
     return;
   }
 
-  // 2. /language command or language reply button
-  const isLangBtn =
-    text === t(KEYS.BTN_CHANGE_LANGUAGE, 'uz') ||
-    text === t(KEYS.BTN_CHANGE_LANGUAGE, 'ru') ||
-    text === t(KEYS.BTN_CHANGE_LANGUAGE, 'en');
-
-  if (text === `/${COMMANDS.LANGUAGE}` || isLangBtn) {
+  // 2. /language command
+  if (text === `/${COMMANDS.LANGUAGE}`) {
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.CHOOSE_LANGUAGE, lang),
