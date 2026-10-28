@@ -145,16 +145,8 @@ export function buildSttLanguagesKeyboard(pageNumber = 1, lang = 'uz') {
     });
   }
 
-  // Cancel row
-  const cancelRow = [
-    {
-      text: t(KEYS.BTN_CANCEL_SELECTION, lang),
-      callback_data: 'stt_cancel',
-    },
-  ];
-
   return {
-    inline_keyboard: [...languageRows, navRow, cancelRow],
+    inline_keyboard: [...languageRows, navRow],
   };
 }
 
