@@ -51,7 +51,7 @@ test('transcribeMedia appends language and prompt to FormData when provided', as
   assert.equal(capturedBody.get('prompt'), "O'zbek tilidagi nutq, lotin alifbosi.");
 });
 
-test('transcribeMedia automatically supplies Uzbek Latin prompt if language is uz and prompt omitted', async () => {
+test('transcribeMedia does not append prompt when prompt is omitted to avoid hallucination', async () => {
   let capturedBody = null;
   const mockFetch = async (url, options) => {
     capturedBody = options.body;
@@ -71,5 +71,5 @@ test('transcribeMedia automatically supplies Uzbek Latin prompt if language is u
 
   assert.equal(res.text, 'Assalomu alaykum');
   assert.equal(capturedBody.get('language'), 'uz');
-  assert.equal(capturedBody.get('prompt'), "O'zbek tilidagi nutq, lotin alifbosi.");
+  assert.equal(capturedBody.has('prompt'), false);
 });

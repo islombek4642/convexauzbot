@@ -42,11 +42,9 @@ export async function transcribeMedia({
     formData.append('language', language);
   }
 
-  // Conditioning prompt for spelling/script biasing
-  // If language is Uzbek ('uz') and prompt wasn't explicitly supplied, default to Latin script prompt
-  const effectivePrompt = prompt || (language === 'uz' ? "O'zbek tilidagi nutq, lotin alifbosi." : null);
-  if (effectivePrompt) {
-    formData.append('prompt', effectivePrompt);
+  // Conditioning prompt for spelling/script biasing (only when explicitly provided)
+  if (prompt) {
+    formData.append('prompt', prompt);
   }
 
   const response = await fetchFn(GROQ_WHISPER_URL, {
