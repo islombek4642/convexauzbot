@@ -30,8 +30,8 @@ export async function resolveVideoUrl(url, customFetch = null) {
   const cleanUrl = url.trim();
 
   // 1. Direct video URL check
-  const pathname = new URL(cleanUrl).pathname.toLowerCase();
-  const ext = pathname.split('.').pop();
+  const cleanPath = cleanUrl.split('?')[0].split('#')[0].toLowerCase();
+  const ext = cleanPath.split('.').pop();
   if (DIRECT_VIDEO_EXTENSIONS.has(ext)) {
     return {
       downloadUrl: cleanUrl,
