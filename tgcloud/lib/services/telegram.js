@@ -103,6 +103,17 @@ export function buildLanguageInlineKeyboard() {
   };
 }
 
+export function buildVideoActionKeyboard(lang) {
+  return {
+    inline_keyboard: [
+      [
+        { text: t(KEYS.BTN_ACTION_STT, lang), callback_data: 'action_stt' },
+        { text: t(KEYS.BTN_ACTION_V2A, lang), callback_data: 'action_v2a' },
+      ],
+    ],
+  };
+}
+
 export function buildSttLanguagesKeyboard(pageNumber = 1, lang = 'uz') {
   const { page, totalPages, items } = getSttPage(pageNumber);
 

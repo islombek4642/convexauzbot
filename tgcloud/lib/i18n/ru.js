@@ -19,6 +19,8 @@ export const ru = {
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
+  [KEYS.BTN_ACTION_STT]: '🎙 Речь в текст',
+  [KEYS.BTN_ACTION_V2A]: '🎬 Аудио из видео (MP3)',
 
   [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Пожалуйста, перед отправкой файла выберите нужную функцию из меню ниже:',
   [KEYS.MSG_ACTION_CANCELLED]: 'Действие отменено. Выберите нужную функцию:',
@@ -26,6 +28,8 @@ export const ru = {
   [KEYS.MSG_CHOOSE_STT_LANG]: '🎙 <b>На каком языке речь?</b>\n\nВыберите язык для наиболее точной транскрибации речи в текст:',
   [KEYS.MSG_STT_CANCELLED]: 'Транскрибация отменена.',
   [KEYS.MSG_V2A_PROMPT]: '🎬 Отправьте видео для извлечения аудиодорожки:',
+  [KEYS.MSG_DOWNLOADING_VIDEO]: '⏳ Видео скачивается, пожалуйста, подождите...',
+  [KEYS.MSG_VIDEO_DOWNLOADED]: '🎬 Видео успешно загружено!\n\nВыберите необходимое действие:',
 
   [KEYS.MSG_PROCESSING]: '⏳ Файл принят. Идет распознавание речи, пожалуйста, подождите...',
   [KEYS.MSG_COMPLETED]: '✅ Транскрибация успешно завершена:',
@@ -42,4 +46,5 @@ export const ru = {
   [KEYS.ERROR_FETCH_FILE_FAILED]: '❌ Не удалось загрузить файл с серверов Telegram.',
   [KEYS.ERROR_NOT_A_VIDEO]: '❌ Пожалуйста, отправьте только видеофайл (MP4, WEBM, MOV, AVI).',
   [KEYS.ERROR_V2A_FAILED]: '❌ Произошла ошибка при извлечении аудио из видео. Пожалуйста, повторите попытку позже.',
+  [KEYS.ERROR_DOWNLOAD_FAILED]: '❌ Произошла ошибка при скачивании видео. Пожалуйста, проверьте правильность ссылки.',
 };

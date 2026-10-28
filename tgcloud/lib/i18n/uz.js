@@ -19,6 +19,8 @@ export const uz = {
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
+  [KEYS.BTN_ACTION_STT]: '🎙 Ovozdan matnga',
+  [KEYS.BTN_ACTION_V2A]: '🎬 Videodan audio (MP3)',
 
   [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Iltimos, fayl yuborishdan oldin pastdagi menyudan kerakli xizmatni tanlang:',
   [KEYS.MSG_ACTION_CANCELLED]: 'Amaliyot bekor qilindi. Kerakli xizmatni tanlang:',
@@ -26,6 +28,8 @@ export const uz = {
   [KEYS.MSG_CHOOSE_STT_LANG]: '🎙 <b>Nutq qaysi tilda yozilgan?</b>\n\nNutqni eng aniq va to\'g\'ri matnga aylantirish uchun tilni tanlang:',
   [KEYS.MSG_STT_CANCELLED]: 'Transkripsiya amaliyoti bekor qilindi.',
   [KEYS.MSG_V2A_PROMPT]: '🎬 Audiosini ajratib olish uchun video yuboring:',
+  [KEYS.MSG_DOWNLOADING_VIDEO]: '⏳ Video yuklab olinmoqda, iltimos kuting...',
+  [KEYS.MSG_VIDEO_DOWNLOADED]: '🎬 Video muvaffaqiyatli yuklandi!\n\nKerakli amaliyotni tanlang:',
 
   [KEYS.MSG_PROCESSING]: '⏳ Fayl qabul qilindi. Nutq matnga aylantirilmoqda, iltimos kuting...',
   [KEYS.MSG_COMPLETED]: '✅ Transkripsiya muvaffaqiyatli yakunlandi:',
@@ -42,4 +46,5 @@ export const uz = {
   [KEYS.ERROR_FETCH_FILE_FAILED]: '❌ Faylni Telegram serveridan yuklab olishda xatolik yuz berdi.',
   [KEYS.ERROR_NOT_A_VIDEO]: '❌ Iltimos, faqat video fayl yuboring (MP4, WEBM, MOV, AVI).',
   [KEYS.ERROR_V2A_FAILED]: '❌ Videodan audio ajratib olishda xatolik yuz berdi. Iltimos, birozdan so\'ng qayta urinib ko\'ring.',
+  [KEYS.ERROR_DOWNLOAD_FAILED]: '❌ Videoni yuklab olishda xatolik yuz berdi. Iltimos, havola to\'g\'riligini tekshiring.',
 };

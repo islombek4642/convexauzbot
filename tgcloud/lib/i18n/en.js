@@ -19,6 +19,8 @@ export const en = {
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
+  [KEYS.BTN_ACTION_STT]: '🎙 Speech-to-Text',
+  [KEYS.BTN_ACTION_V2A]: '🎬 Video to Audio (MP3)',
 
   [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Please select a service from the menu below before sending a file:',
   [KEYS.MSG_ACTION_CANCELLED]: 'Action cancelled. Please choose a service:',
@@ -26,6 +28,8 @@ export const en = {
   [KEYS.MSG_CHOOSE_STT_LANG]: '🎙 <b>What language is spoken?</b>\n\nChoose the spoken language for optimal transcription accuracy:',
   [KEYS.MSG_STT_CANCELLED]: 'Transcription cancelled.',
   [KEYS.MSG_V2A_PROMPT]: '🎬 Send a video to extract its audio track:',
+  [KEYS.MSG_DOWNLOADING_VIDEO]: '⏳ Downloading video, please wait...',
+  [KEYS.MSG_VIDEO_DOWNLOADED]: '🎬 Video downloaded successfully!\n\nChoose an action below:',
 
   [KEYS.MSG_PROCESSING]: '⏳ File received. Transcribing speech to text, please wait...',
   [KEYS.MSG_COMPLETED]: '✅ Transcription completed successfully:',
@@ -42,4 +46,5 @@ export const en = {
   [KEYS.ERROR_FETCH_FILE_FAILED]: '❌ Failed to download the file from Telegram servers.',
   [KEYS.ERROR_NOT_A_VIDEO]: '❌ Please send a video file only (MP4, WEBM, MOV, AVI).',
   [KEYS.ERROR_V2A_FAILED]: '❌ An error occurred while extracting audio from video. Please try again later.',
+  [KEYS.ERROR_DOWNLOAD_FAILED]: '❌ Failed to download video. Please check if the link is valid and public.',
 };
