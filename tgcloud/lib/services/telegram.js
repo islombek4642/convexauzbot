@@ -158,6 +158,7 @@ export function buildSttLanguagesKeyboard(pageNumber = 1, lang = 'uz') {
   };
 }
 
-export async function downloadTelegramFile(fileId) {
-  return await api.getFileContent(fileId);
+export async function downloadTelegramFile(fileId, customApi) {
+  const tgApi = customApi || api;
+  return await tgApi.getFileContent(fileId);
 }
