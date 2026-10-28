@@ -13,6 +13,9 @@ export const uz = {
   [KEYS.BTN_GUIDE]: '🎙 Ovozdan matnga',
   [KEYS.BTN_V2A]: '🎬 Videodan audio (MP3)',
   [KEYS.BTN_CANCEL]: '❌ Bekor qilish',
+  [KEYS.BTN_CANCEL_SELECTION]: '❌ Bekor qilish',
+  [KEYS.BTN_PAGINATION_PREV]: '⬅️ Oldingi',
+  [KEYS.BTN_PAGINATION_NEXT]: 'Keyingi ➡️',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
@@ -20,6 +23,8 @@ export const uz = {
   [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Iltimos, fayl yuborishdan oldin pastdagi menyudan kerakli xizmatni tanlang:',
   [KEYS.MSG_ACTION_CANCELLED]: 'Amaliyot bekor qilindi. Kerakli xizmatni tanlang:',
   [KEYS.MSG_STT_PROMPT]: '🎙 Transkripsiya qilish uchun video, audio yoki ovozli xabar yuboring:',
+  [KEYS.MSG_CHOOSE_STT_LANG]: '🎙 <b>Nutq qaysi tilda yozilgan?</b>\n\nNutqni eng aniq va to\'g\'ri matnga aylantirish uchun tilni tanlang:',
+  [KEYS.MSG_STT_CANCELLED]: 'Transkripsiya amaliyoti bekor qilindi.',
   [KEYS.MSG_V2A_PROMPT]: '🎬 Audiosini ajratib olish uchun video yuboring:',
 
   [KEYS.MSG_PROCESSING]: '⏳ Fayl qabul qilindi. Nutq matnga aylantirilmoqda, iltimos kuting...',

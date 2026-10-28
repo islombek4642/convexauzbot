@@ -13,6 +13,9 @@ export const en = {
   [KEYS.BTN_GUIDE]: '🎙 Speech-to-Text',
   [KEYS.BTN_V2A]: '🎬 Video to Audio (MP3)',
   [KEYS.BTN_CANCEL]: '❌ Cancel',
+  [KEYS.BTN_CANCEL_SELECTION]: '❌ Cancel',
+  [KEYS.BTN_PAGINATION_PREV]: '⬅️ Previous',
+  [KEYS.BTN_PAGINATION_NEXT]: 'Next ➡️',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
@@ -20,6 +23,8 @@ export const en = {
   [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Please select a service from the menu below before sending a file:',
   [KEYS.MSG_ACTION_CANCELLED]: 'Action cancelled. Please choose a service:',
   [KEYS.MSG_STT_PROMPT]: '🎙 Send a video, audio, or voice message to transcribe:',
+  [KEYS.MSG_CHOOSE_STT_LANG]: '🎙 <b>What language is spoken?</b>\n\nChoose the spoken language for optimal transcription accuracy:',
+  [KEYS.MSG_STT_CANCELLED]: 'Transcription cancelled.',
   [KEYS.MSG_V2A_PROMPT]: '🎬 Send a video to extract its audio track:',
 
   [KEYS.MSG_PROCESSING]: '⏳ File received. Transcribing speech to text, please wait...',

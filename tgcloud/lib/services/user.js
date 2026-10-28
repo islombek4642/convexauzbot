@@ -13,11 +13,23 @@ export async function getUser(chatId, customDb) {
     .get();
 
   if (existing) {
+    let pendingMedia = null;
+    if (existing.pendingMedia) {
+      try {
+        pendingMedia = typeof existing.pendingMedia === 'string'
+          ? JSON.parse(existing.pendingMedia)
+          : existing.pendingMedia;
+      } catch {
+        pendingMedia = null;
+      }
+    }
+
     return {
       chatId: existing.chatId,
       language: existing.language || DEFAULT_LANGUAGE,
       isProcessing: Boolean(existing.isProcessing),
       state: existing.state || STATES.IDLE,
+      pendingMedia,
     };
   }
 
@@ -42,6 +54,7 @@ export async function getUser(chatId, customDb) {
     language: created?.language || DEFAULT_LANGUAGE,
     isProcessing: Boolean(created?.isProcessing),
     state: created?.state || STATES.IDLE,
+    pendingMedia: null,
   };
 }
 
@@ -71,3 +84,14 @@ export async function setUserState(chatId, state, customDb) {
     .where(eq(users.chatId, chatId))
     .run();
 }
+
+export async function setPendingMedia(chatId, mediaData, customDb) {
+  const database = customDb || defaultDb;
+  const serialized = mediaData ? JSON.stringify(mediaData) : null;
+  await database
+    .update(users)
+    .set({ pendingMedia: serialized })
+    .where(eq(users.chatId, chatId))
+    .run();
+}
+

@@ -13,6 +13,9 @@ export const KEYS = {
   BTN_GUIDE: 'btn_guide',
   BTN_V2A: 'btn_v2a',
   BTN_CANCEL: 'btn_cancel',
+  BTN_CANCEL_SELECTION: 'btn_cancel_selection',
+  BTN_PAGINATION_PREV: 'btn_pagination_prev',
+  BTN_PAGINATION_NEXT: 'btn_pagination_next',
   BTN_LANG_UZ: 'btn_lang_uz',
   BTN_LANG_RU: 'btn_lang_ru',
   BTN_LANG_EN: 'btn_lang_en',
@@ -21,6 +24,8 @@ export const KEYS = {
   MSG_PLEASE_SELECT_SERVICE: 'msg_please_select_service',
   MSG_ACTION_CANCELLED: 'msg_action_cancelled',
   MSG_STT_PROMPT: 'msg_stt_prompt',
+  MSG_CHOOSE_STT_LANG: 'msg_choose_stt_lang',
+  MSG_STT_CANCELLED: 'msg_stt_cancelled',
   MSG_V2A_PROMPT: 'msg_v2a_prompt',
 
   // Progress & Delivery

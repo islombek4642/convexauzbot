@@ -13,6 +13,9 @@ export const ru = {
   [KEYS.BTN_GUIDE]: '🎙 Речь в текст',
   [KEYS.BTN_V2A]: '🎬 Аудио из видео (MP3)',
   [KEYS.BTN_CANCEL]: '❌ Отмена',
+  [KEYS.BTN_CANCEL_SELECTION]: '❌ Отмена',
+  [KEYS.BTN_PAGINATION_PREV]: '⬅️ Назад',
+  [KEYS.BTN_PAGINATION_NEXT]: 'Далее ➡️',
   [KEYS.BTN_LANG_UZ]: '🇺🇿 O\'zbekcha',
   [KEYS.BTN_LANG_RU]: '🇷🇺 Русский',
   [KEYS.BTN_LANG_EN]: '🇬🇧 English',
@@ -20,6 +23,8 @@ export const ru = {
   [KEYS.MSG_PLEASE_SELECT_SERVICE]: '⚠️ Пожалуйста, перед отправкой файла выберите нужную функцию из меню ниже:',
   [KEYS.MSG_ACTION_CANCELLED]: 'Действие отменено. Выберите нужную функцию:',
   [KEYS.MSG_STT_PROMPT]: '🎙 Отправьте видео, аудио или голосовое сообщение для транскрибации:',
+  [KEYS.MSG_CHOOSE_STT_LANG]: '🎙 <b>На каком языке речь?</b>\n\nВыберите язык для наиболее точной транскрибации речи в текст:',
+  [KEYS.MSG_STT_CANCELLED]: 'Транскрибация отменена.',
   [KEYS.MSG_V2A_PROMPT]: '🎬 Отправьте видео для извлечения аудиодорожки:',
 
   [KEYS.MSG_PROCESSING]: '⏳ Файл принят. Идет распознавание речи, пожалуйста, подождите...',

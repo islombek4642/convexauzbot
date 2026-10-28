@@ -5,5 +5,6 @@ export const users = table('users', {
   language: text('language').notNull().default('uz'),
   isProcessing: integer('is_processing', { mode: 'boolean' }).notNull().default(false),
   state: text('state').notNull().default('idle'),
+  pendingMedia: text('pending_media'),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).default(sql`(unixepoch())`),
 });
