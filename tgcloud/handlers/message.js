@@ -11,12 +11,14 @@ import {
   buildCancelReplyKeyboard,
   buildLanguageInlineKeyboard,
   buildSttLanguagesKeyboard,
+  buildVideoActionKeyboard,
   downloadTelegramFile,
 } from '../lib/services/telegram.js';
 import { chunkText } from '../lib/utils/chunker.js';
 import { formatSegmentsToTxt } from '../lib/utils/formatter.js';
 import { transcribeMedia } from '../lib/services/groq.js';
 import { extractAudioWithRendi } from '../lib/services/rendi.js';
+import { extractUrl, resolveVideoUrl } from '../lib/services/downloader.js';
 
 export default async function (message, deps = {}) {
   if (!message || !message.chat) return;
@@ -124,6 +126,68 @@ export default async function (message, deps = {}) {
       parse_mode: 'HTML',
       reply_markup: buildCancelReplyKeyboard(lang),
     });
+    return;
+  }
+
+  // 6.5. Detect Video URL (TikTok, direct MP4, etc.)
+  const detectedUrl = extractUrl(text);
+  if (detectedUrl) {
+    if (user.isProcessing) {
+      await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.ERROR_ALREADY_PROCESSING, lang),
+        reply_markup: user.state !== STATES.IDLE ? buildCancelReplyKeyboard(lang) : buildMainReplyKeyboard(lang),
+      });
+      return;
+    }
+
+    await setUserProcessing(chatId, true, db);
+    let downloadProgressMsg = null;
+    try {
+      downloadProgressMsg = await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.MSG_DOWNLOADING_VIDEO, lang),
+      });
+
+      const videoInfo = await resolveVideoUrl(detectedUrl);
+
+      if (downloadProgressMsg?.message_id) {
+        try {
+          await api.deleteMessage({
+            chat_id: chatId,
+            message_id: downloadProgressMsg.message_id,
+          });
+        } catch (delErr) {
+          console.error('Failed to delete download progress msg:', delErr);
+        }
+      }
+
+      await api.sendVideo({
+        chat_id: chatId,
+        video: videoInfo.downloadUrl,
+        caption: t(KEYS.MSG_VIDEO_DOWNLOADED, lang),
+        reply_markup: buildVideoActionKeyboard(lang),
+      });
+    } catch (err) {
+      console.error('Video link resolution error:', err);
+      if (downloadProgressMsg?.message_id) {
+        try {
+          await api.deleteMessage({
+            chat_id: chatId,
+            message_id: downloadProgressMsg.message_id,
+          });
+        } catch (delErr) {
+          console.error('Failed to delete download progress msg on error:', delErr);
+        }
+      }
+      await api.sendMessage({
+        chat_id: chatId,
+        text: t(KEYS.ERROR_DOWNLOAD_FAILED, lang),
+        reply_markup: user.state !== STATES.IDLE ? buildCancelReplyKeyboard(lang) : buildMainReplyKeyboard(lang),
+      });
+    } finally {
+      await setUserProcessing(chatId, false, db);
+    }
     return;
   }
 
