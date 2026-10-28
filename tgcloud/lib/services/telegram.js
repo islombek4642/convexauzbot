@@ -108,6 +108,8 @@ export function buildVideoActionKeyboard(lang) {
     inline_keyboard: [
       [
         { text: t(KEYS.BTN_ACTION_STT, lang), callback_data: 'action_stt' },
+      ],
+      [
         { text: t(KEYS.BTN_ACTION_V2A, lang), callback_data: 'action_v2a' },
       ],
     ],

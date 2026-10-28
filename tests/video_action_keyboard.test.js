@@ -7,10 +7,11 @@ import { t } from '../tgcloud/lib/i18n/index.js';
 test('buildVideoActionKeyboard generates inline buttons for STT and V2A', () => {
   const kb = buildVideoActionKeyboard('uz');
   assert.ok(kb.inline_keyboard);
-  assert.equal(kb.inline_keyboard.length, 1);
-  assert.equal(kb.inline_keyboard[0].length, 2);
+  assert.equal(kb.inline_keyboard.length, 2);
+  assert.equal(kb.inline_keyboard[0].length, 1);
+  assert.equal(kb.inline_keyboard[1].length, 1);
   assert.equal(kb.inline_keyboard[0][0].callback_data, 'action_stt');
-  assert.equal(kb.inline_keyboard[0][1].callback_data, 'action_v2a');
+  assert.equal(kb.inline_keyboard[1][0].callback_data, 'action_v2a');
 });
 
 test('i18n contains video download keys across uz, ru, and en', () => {

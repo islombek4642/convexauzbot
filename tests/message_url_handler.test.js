@@ -69,7 +69,7 @@ test('messageHandler detects URL in text and sends video with action buttons', a
   assert.equal(sentVideos[0].video, 'https://example.com/test.mp4');
   assert.ok(sentVideos[0].reply_markup.inline_keyboard);
   assert.equal(sentVideos[0].reply_markup.inline_keyboard[0][0].callback_data, 'action_stt');
-  assert.equal(sentVideos[0].reply_markup.inline_keyboard[0][1].callback_data, 'action_v2a');
+  assert.equal(sentVideos[0].reply_markup.inline_keyboard[1][0].callback_data, 'action_v2a');
 
   // 3. Progress message deleted
   assert.equal(deletedMessages.length, 1);
