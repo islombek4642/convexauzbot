@@ -10,6 +10,8 @@ export async function transcribeMedia({
   mimeType = 'audio/mp3',
   apiKey,
   customFetch,
+  language,
+  prompt,
 }) {
   if (!apiKey || typeof apiKey !== 'string' || !apiKey.trim()) {
     throw new Error('GROQ_API_KEY is required for transcription');
@@ -34,6 +36,18 @@ export async function transcribeMedia({
   formData.append('model', GROQ_WHISPER_MODEL);
   formData.append('response_format', 'verbose_json');
   formData.append('temperature', '0');
+
+  // If specific language is requested (not auto-detect)
+  if (language && language !== 'auto') {
+    formData.append('language', language);
+  }
+
+  // Conditioning prompt for spelling/script biasing
+  // If language is Uzbek ('uz') and prompt wasn't explicitly supplied, default to Latin script prompt
+  const effectivePrompt = prompt || (language === 'uz' ? "O'zbek tilidagi nutq, lotin alifbosi." : null);
+  if (effectivePrompt) {
+    formData.append('prompt', effectivePrompt);
+  }
 
   const response = await fetchFn(GROQ_WHISPER_URL, {
     method: 'POST',
