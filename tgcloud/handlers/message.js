@@ -1,5 +1,5 @@
-import { api, InputFile } from 'sdk';
-import { getUser, setUserProcessing, setUserState } from '../lib/services/user.js';
+import { api as defaultApi, InputFile } from 'sdk';
+import { getUser, setUserProcessing, setUserState, setPendingMedia } from '../lib/services/user.js';
 import { t } from '../lib/i18n/index.js';
 import { KEYS } from '../lib/constants/keys.js';
 import { COMMANDS } from '../lib/constants/commands.js';
@@ -10,6 +10,7 @@ import {
   buildMainReplyKeyboard,
   buildCancelReplyKeyboard,
   buildLanguageInlineKeyboard,
+  buildSttLanguagesKeyboard,
   downloadTelegramFile,
 } from '../lib/services/telegram.js';
 import { chunkText } from '../lib/utils/chunker.js';
@@ -17,11 +18,14 @@ import { formatSegmentsToTxt } from '../lib/utils/formatter.js';
 import { transcribeMedia } from '../lib/services/groq.js';
 import { extractAudioWithRendi } from '../lib/services/rendi.js';
 
-export default async function (message) {
+export default async function (message, deps = {}) {
   if (!message || !message.chat) return;
 
+  const api = deps.api || defaultApi;
+  const db = deps.db || null;
+
   const chatId = message.chat.id;
-  const user = await getUser(chatId);
+  const user = await getUser(chatId, db);
   const lang = user.language;
   const text = (message.text || '').trim();
 
@@ -67,7 +71,9 @@ export default async function (message) {
     text === t(KEYS.BTN_CANCEL, 'en');
 
   if (isCancelBtn) {
-    await setUserState(chatId, STATES.IDLE);
+    await setUserState(chatId, STATES.IDLE, db);
+    await setPendingMedia(chatId, null, db);
+    await setUserProcessing(chatId, false, db);
     await api.sendMessage({
       chat_id: chatId,
       text: t(KEYS.MSG_ACTION_CANCELLED, lang),
@@ -264,132 +270,17 @@ export default async function (message) {
     return;
   }
 
-  // 12. Handle Speech-to-Text (STT)
-  await setUserProcessing(chatId, true);
+  // 12. Handle Speech-to-Text (STT) - Save pending media and prompt user for spoken language
+  await setPendingMedia(chatId, {
+    fileId: media.fileId,
+    fileName: media.fileName,
+    mimeType: media.mimeType,
+  }, db);
 
-  let progressMsg = null;
-  try {
-    // Send progress indicator message
-    progressMsg = await api.sendMessage({
-      chat_id: chatId,
-      text: t(KEYS.MSG_PROCESSING, lang),
-    });
-
-    // Download file bytes directly via SDK
-    const fileBytes = await downloadTelegramFile(media.fileId);
-    if (!fileBytes) {
-      throw new Error('Failed to retrieve file bytes from Telegram');
-    }
-
-    // Call Groq Whisper service
-    const transcription = await transcribeMedia({
-      fileBytes,
-      fileName: media.fileName,
-      mimeType: media.mimeType,
-      apiKey: GROQ_API_KEY,
-    });
-
-    if (!transcription.text) {
-      await setUserState(chatId, STATES.IDLE);
-      if (progressMsg && progressMsg.message_id) {
-        try {
-          await api.deleteMessage({
-            chat_id: chatId,
-            message_id: progressMsg.message_id,
-          });
-        } catch (delErr) {
-          console.error('Failed to delete progress message:', delErr);
-        }
-      }
-      await api.sendMessage({
-        chat_id: chatId,
-        text: t(KEYS.ERROR_NO_SPEECH_DETECTED, lang),
-        reply_markup: buildMainReplyKeyboard(lang),
-      });
-      return;
-    }
-
-    // Deliver transcription and reset to main menu
-    await setUserState(chatId, STATES.IDLE);
-    const chunks = chunkText(transcription.text, 4000);
-
-    if (chunks.length === 1) {
-      if (progressMsg && progressMsg.message_id) {
-        try {
-          await api.deleteMessage({
-            chat_id: chatId,
-            message_id: progressMsg.message_id,
-          });
-        } catch (delErr) {
-          console.error('Failed to delete progress message:', delErr);
-        }
-      }
-
-      await api.sendMessage({
-        chat_id: chatId,
-        text: `${t(KEYS.MSG_COMPLETED, lang)}\n\n${chunks[0]}`,
-        reply_markup: buildMainReplyKeyboard(lang),
-      });
-    } else {
-      if (progressMsg && progressMsg.message_id) {
-        try {
-          await api.deleteMessage({
-            chat_id: chatId,
-            message_id: progressMsg.message_id,
-          });
-        } catch (delErr) {
-          console.error('Failed to delete progress message:', delErr);
-        }
-      }
-
-      // Sequentially numbered chunks [1/N]
-      for (const chunk of chunks) {
-        await api.sendMessage({
-          chat_id: chatId,
-          text: chunk,
-        });
-      }
-
-      // Format original segments with timestamps into .txt document
-      const txtContent = formatSegmentsToTxt(transcription.segments) || transcription.text;
-      const encoder = new TextEncoder();
-      const txtBytes = encoder.encode(txtContent);
-
-      try {
-        const docFile = typeof InputFile !== 'undefined'
-          ? new InputFile(txtBytes, 'transcription.txt', { type: 'text/plain' })
-          : new Blob([txtBytes], { type: 'text/plain' });
-
-        await api.sendDocument({
-          chat_id: chatId,
-          document: docFile,
-          caption: t(KEYS.MSG_ATTACHED_TXT, lang),
-          reply_markup: buildMainReplyKeyboard(lang),
-        });
-      } catch (docErr) {
-        console.error('Failed to send .txt document:', docErr);
-      }
-    }
-  } catch (error) {
-    console.error('Transcription processing error:', error);
-    await setUserState(chatId, STATES.IDLE);
-    if (progressMsg && progressMsg.message_id) {
-      try {
-        await api.deleteMessage({
-          chat_id: chatId,
-          message_id: progressMsg.message_id,
-        });
-      } catch (delErr) {
-        console.error('Failed to delete progress message on error:', delErr);
-      }
-    }
-    await api.sendMessage({
-      chat_id: chatId,
-      text: t(KEYS.ERROR_PROCESSING_FAILED, lang),
-      reply_markup: buildMainReplyKeyboard(lang),
-    });
-  } finally {
-    // Release processing lock
-    await setUserProcessing(chatId, false);
-  }
+  await api.sendMessage({
+    chat_id: chatId,
+    text: t(KEYS.MSG_CHOOSE_STT_LANG, lang),
+    parse_mode: 'HTML',
+    reply_markup: buildSttLanguagesKeyboard(1, lang),
+  });
 }

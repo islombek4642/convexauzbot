@@ -214,7 +214,7 @@ test('message handler sends general HELP_TEXT for /help and STT_GUIDE_TEXT for g
   assert.notEqual(sentMessages[0].text, t(KEYS.HELP_TEXT, 'uz'));
 });
 
-test('message handler deletes progress message and delivers transcription returning to main menu', async () => {
+test('message handler prompts for spoken language and stores pendingMedia when STT media received', async () => {
   const messageHandler = (await import('../tgcloud/handlers/message.js')).default;
   const { setUserState, getUser } = await import('../tgcloud/lib/services/user.js');
   const { t } = await import('../tgcloud/lib/i18n/index.js');
@@ -224,53 +224,25 @@ test('message handler deletes progress message and delivers transcription return
   await setUserState(12345, 'stt');
 
   let sentMessages = [];
-  let deletedMessages = [];
-
   api.sendMessage = async (params) => {
     sentMessages.push(params);
     return { ok: true, message_id: 888 };
   };
 
-  api.deleteMessage = async (params) => {
-    deletedMessages.push(params);
-    return { ok: true };
-  };
-
-  // Mock globalThis.fetch to simulate Groq API response
-  const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => ({
-    ok: true,
-    json: async () => ({
-      text: 'Salom dunyo',
-      segments: [{ start: 0, end: 2, text: 'Salom dunyo' }],
-    }),
+  await messageHandler({
+    chat: { id: 12345 },
+    voice: { file_id: 'voice_file_1', file_size: 1000 },
   });
 
-  try {
-    await messageHandler({
-      chat: { id: 12345 },
-      voice: { file_id: 'voice_file_1', file_size: 1000 },
-    });
+  // 1. Sent language choice prompt with pagination keyboard
+  assert.equal(sentMessages.length, 1);
+  assert.equal(sentMessages[0].text, t(KEYS.MSG_CHOOSE_STT_LANG, 'uz'));
+  assert.ok(sentMessages[0].reply_markup.inline_keyboard);
+  assert.equal(sentMessages[0].reply_markup.inline_keyboard[0][0].callback_data, 'stt_lang:auto');
 
-    // 1. Sent progress message
-    assert.equal(sentMessages[0].text, t(KEYS.MSG_PROCESSING, 'uz'));
-
-    // 2. Deleted progress message
-    assert.equal(deletedMessages.length, 1);
-    assert.equal(deletedMessages[0].message_id, 888);
-
-    // 3. Sent completed transcription with main reply keyboard
-    assert.equal(sentMessages.length, 2);
-    assert.ok(sentMessages[1].text.includes('Salom dunyo'));
-    assert.ok(sentMessages[1].text.includes(t(KEYS.MSG_COMPLETED, 'uz')));
-    assert.ok(sentMessages[1].reply_markup.keyboard, 'Should restore main reply keyboard');
-
-    // 4. State should automatically reset to idle
-    const user = await getUser(12345);
-    assert.equal(user.state, 'idle');
-  } finally {
-    globalThis.fetch = originalFetch;
-  }
+  // 2. Pending media saved
+  const user = await getUser(12345);
+  assert.equal(user.pendingMedia.fileId, 'voice_file_1');
 });
 
 test('cancel button resets user state to idle and sends cancellation confirmation', async () => {
