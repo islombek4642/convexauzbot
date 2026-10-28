@@ -1,6 +1,7 @@
 import { api } from 'sdk';
 import { t } from '../i18n/index.js';
 import { KEYS } from '../constants/keys.js';
+import { getSttPage } from '../constants/stt_languages.js';
 
 const SUPPORTED_EXTENSIONS = new Set(['mp4', 'webm', 'mov', 'avi', 'mkv', 'mp3', 'm4a', 'wav', 'ogg', 'flac', 'oga']);
 
@@ -99,6 +100,61 @@ export function buildLanguageInlineKeyboard() {
         { text: '🇬🇧 English', callback_data: 'set_lang:en' },
       ],
     ],
+  };
+}
+
+export function buildSttLanguagesKeyboard(pageNumber = 1, lang = 'uz') {
+  const { page, totalPages, items } = getSttPage(pageNumber);
+
+  // Group languages into rows of 2
+  const languageRows = [];
+  for (let i = 0; i < items.length; i += 2) {
+    const row = [
+      {
+        text: `${items[i].flag} ${items[i].name}`,
+        callback_data: `stt_lang:${items[i].code}`,
+      },
+    ];
+    if (i + 1 < items.length) {
+      row.push({
+        text: `${items[i + 1].flag} ${items[i + 1].name}`,
+        callback_data: `stt_lang:${items[i + 1].code}`,
+      });
+    }
+    languageRows.push(row);
+  }
+
+  // Navigation row: [ Prev ] [ Page/Total ] [ Next ]
+  const navRow = [];
+  if (page > 1) {
+    navRow.push({
+      text: t(KEYS.BTN_PAGINATION_PREV, lang),
+      callback_data: `stt_page:${page - 1}`,
+    });
+  }
+
+  navRow.push({
+    text: `📄 ${page}/${totalPages}`,
+    callback_data: `stt_page:${page}`,
+  });
+
+  if (page < totalPages) {
+    navRow.push({
+      text: t(KEYS.BTN_PAGINATION_NEXT, lang),
+      callback_data: `stt_page:${page + 1}`,
+    });
+  }
+
+  // Cancel row
+  const cancelRow = [
+    {
+      text: t(KEYS.BTN_CANCEL_SELECTION, lang),
+      callback_data: 'stt_cancel',
+    },
+  ];
+
+  return {
+    inline_keyboard: [...languageRows, navRow, cancelRow],
   };
 }
 
