@@ -4,4 +4,5 @@ node_modules/
 .env
 .env.*
 tgcloud/lib/constants/secrets.js
-
+*.mp4
+scratch/
